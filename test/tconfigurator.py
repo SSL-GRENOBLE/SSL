@@ -1,11 +1,9 @@
 import logging
 import inspect
-import os
 import sys
 
-from datetime import datetime
 from functools import partial
-from pathlib import Path
+
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import numpy as np
@@ -14,7 +12,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
 from dataloaders import DataReader
-from utils import make_iter
+from utils import make_iter, setup_logger
 
 
 __all__ = ["TestConfiguration", "Tester"]
@@ -152,24 +150,7 @@ class Tester(object):
             raise ValueError("No results may be reached.")
         self.verbose = verbose
         self.log = log
-
-        logger = logging.getLogger("SSLLogs")
-        logger.setLevel(logging.INFO)
-        if verbose:
-            logger.addHandler(logging.StreamHandler(sys.stdout))
-        if log:
-            if log_root == ".":
-                log_root = str(Path(__file__).resolve().parents[0])
-            log_root = os.path.join(log_root, '.ssl_test_logs')
-            if not os.path.exists(log_root):
-                os.mkdir(log_root)
-            log_path = os.path.join(
-                log_root, f'{datetime.now().strftime("%H-%M-%S_%Y-%m-%d")}'
-            )
-            open(log_path, "w").close()
-            file_handler = logging.FileHandler(log_path)
-            logger.addHandler(file_handler)
-        self.logger = logger
+        self.logger = setup_logger(verbose, log, log_root)
 
         self.logger.info("-" * 5 + " Configuration info " + "-" * 5)
         self.logger.info(f"Model: {self.configuration.model_cls}.")

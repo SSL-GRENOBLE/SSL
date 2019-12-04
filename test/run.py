@@ -3,6 +3,8 @@ import importlib.util
 import distutils.util
 import os
 
+from pathlib import Path
+
 from tconfigurator import TestConfiguration, Tester
 from dataloaders import DATASETS
 
@@ -18,10 +20,10 @@ def check_model(args) -> None:
 
 
 def check_benchmarks(args):
-    if args.data_root is None:
-        raise ValueError("No path to data given.")
     if args.benchmarks is None:
         raise ValueError("No benchmarks given.")
+    if args.data_root == "../../data":
+        args.data_root = str(os.path.join(Path(__file__).resolve().parents[2], "data"))
     if not os.path.exists(args.data_root):
         raise FileNotFoundError(f"No such folder with data exists: {args.data_root}.")
 
@@ -68,7 +70,7 @@ def check_input(args):
     check_config(args)
     if args.lsizes is None:
         args.lsizes = [50]
-    args.random_states = list(range(0, args.n_states * 10, 10))
+    args.random_states = list(range(args.n_states))
 
 
 if __name__ == "__main__":
@@ -96,10 +98,16 @@ if __name__ == "__main__":
         "--log_root",
         type=str,
         help="Folder to store logs, if logging is on.",
-        default=".test_logs",
+        default=".ssl_test_logs",
     )
 
-    parser.set_defaults(log="False", verbose="True", n_states=10, baseline="True")
+    parser.set_defaults(
+        log="False",
+        verbose="True",
+        n_states=10,
+        baseline="True",
+        data_root="../../data",
+    )
     args = parser.parse_args()
 
     check_input(args)
