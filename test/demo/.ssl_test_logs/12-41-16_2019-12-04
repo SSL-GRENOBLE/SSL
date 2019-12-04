@@ -1,0 +1,17 @@
+----- Configuration info -----
+Model: <class 'sslearn.models.sla._customs.BinarySLARandomForestClassifier'>.
+Baseline: <class 'sklearn.ensemble.forest.RandomForestClassifier'>.
+Model params: [{'n_estimators': 100, 'adaptive': True, 'margin_mode': 'soft', 'max_iter': 150}].
+Baseline params: [{'n_estimators': 100}].
+
+----- Testing -----
+
+... Testing benchmark banknotes.
+
+...... Testing semisupervised model:
+...... with configuration: {'n_estimators': 100, 'adaptive': True, 'margin_mode': 'soft', 'max_iter': 150}.
+Labeled size = 50 (ratio 0.038), accuracy = 0.88048.
+
+...... Testing supervised model:
+...... with configuration: {'n_estimators': 100}.
+Labeled size = 50 (ratio 0.038), accuracy = 0.90015.
