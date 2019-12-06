@@ -1,16 +1,10 @@
 import gzip
-import json
 import os
-
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 from sklearn.preprocessing import LabelEncoder
-
-
-__all__ = ["DataReader"]
 
 
 def binarize_multi(x, y, *labels):
@@ -70,27 +64,3 @@ def read_banknotes(root: str):
     x = df.values[:, :-1].astype(float)
     y = df.values[:, -1].astype(int)
     return x, y
-
-
-class DataReader(object):
-    def __init__(self, data_root: str) -> None:
-        self.data_root = data_root
-        with open(
-            os.path.join(Path(__file__).resolve().parents[0], "dataset2dataname.json")
-        ) as f:
-            self.dataset2dataname = json.load(f)
-
-    def read(self, benchmark: str) -> np.ndarray:
-        if benchmark not in self.dataset2dataname:
-            raise ValueError(f"No support for {benchmark} yet.")
-        folder = os.path.join(self.data_root, self.dataset2dataname[benchmark])
-        if benchmark == "banknotes":
-            return read_banknotes(folder)
-        elif benchmark == "telescope":
-            return read_telescope(folder)
-        elif benchmark == "pendigits_4_9":
-            return read_pendigits_4_9(folder)
-        elif benchmark == "mnist_4_9":
-            return read_mnist_4_9(folder)
-        elif benchmark == "fashion_mnist_4_9":
-            return read_fashion_mnist_4_9(folder)

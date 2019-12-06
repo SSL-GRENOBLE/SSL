@@ -11,14 +11,14 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
-from datareader import DataReader
+from data_react.reader import DataReader
 from utils import make_iter, setup_logger
 
 
-__all__ = ["TestConfiguration", "Tester"]
+__all__ = ["MasterConfiguration", "TestRunner"]
 
 
-class TestConfiguration(object):
+class MasterConfiguration(object):
     def __init__(
         self,
         model_cls: Optional[Any] = None,
@@ -62,70 +62,10 @@ class TestConfiguration(object):
         return [partial(self.baseline_cls, **params) for params in self.baseline_inits]
 
 
-def test_model_config(
-    model_config: Any,
-    x: np.ndarray,
-    y: np.ndarray,
-    random_states: Union[Iterable[int], int] = 0,
-    lsizes: Optional[Any] = None,
-    logger: Optional[logging.Logger] = None,
-    ssl: bool = True,
-) -> None:
-    """
-    Arguments:
-        model: Model to test.
-        ssl: Whether model is semi-supervised.
-            Default is True.
-    """
-    logger.info(
-        "\n" + f"...... Testing {'semisupervised' if ssl else 'supervised'} model:"
-    )
-    logger.info(f"...... with configuration: {model_config.keywords or 'default'}.")
-
-    if isinstance(random_states, int):
-        random_states = [random_states]
-
-    verbose = False
-    if logger.hasHandlers():
-        for handler in logger.handlers:
-            if handler.stream == sys.stdout:
-                verbose = True
-                break
-
-    is_random_state_kw = False
-    if "random_state" in inspect.signature(model_config.func).parameters:
-        is_random_state_kw = True
-
-    for lsize in make_iter(lsizes, verbose, desc="Sizes"):
-        scores = []
-        for random_state in make_iter(random_states, verbose, desc="\tRandom states"):
-            if is_random_state_kw:
-                model = model_config(random_state=random_state)
-            else:
-                model = model_config()
-
-            x_train, x_test, y_train, y_test = train_test_split(
-                x, y, train_size=lsize, stratify=y, random_state=random_state
-            )
-
-            if ssl:
-                model.fit(x_train, y_train, x_test)
-            else:
-                model.fit(x_train, y_train)
-            preds = model.predict(x_test)
-            scores.append(accuracy_score(preds, y_test))
-
-        logger.info(
-            "Labeled size = {} (ratio {:.3f}), accuracy = {:.5f}.".format(
-                lsize, lsize / len(y_test), np.mean(scores)
-            )
-        )
-
-
-class Tester(object):
+class TestRunner(object):
     def __init__(
         self,
-        configuration: TestConfiguration,
+        configuration: MasterConfiguration,
         data_root: str,
         random_states: List[int],
         lsizes: List[int],
@@ -176,7 +116,7 @@ class Tester(object):
 
             if self.configuration.model_cls is not None:
                 for model_config in self.configuration.model_configs:
-                    test_model_config(
+                    self._test_config(
                         model_config,
                         x,
                         y,
@@ -188,7 +128,7 @@ class Tester(object):
 
             if self.configuration.baseline_cls is not None:
                 for model_config in self.configuration.baseline_configs:
-                    test_model_config(
+                    self._test_config(
                         model_config,
                         x,
                         y,
@@ -197,3 +137,65 @@ class Tester(object):
                         self.logger,
                         False,
                     )
+
+    def _test_config(
+        self,
+        config: partial,
+        x: np.ndarray,
+        y: np.ndarray,
+        random_states: Union[Iterable[int], int] = 0,
+        lsizes: Optional[Any] = None,
+        logger: Optional[logging.Logger] = None,
+        ssl: bool = True,
+    ) -> None:
+        """
+        Arguments:
+            model: Model to test.
+            ssl: Whether model is semi-supervised.
+                Default is True.
+        """
+        logger.info(
+            "\n" + f"...... Testing {'semisupervised' if ssl else 'supervised'} model:"
+        )
+        logger.info(f"...... with configuration: {config.keywords or 'default'}.")
+
+        if isinstance(random_states, int):
+            random_states = [random_states]
+
+        verbose = False
+        if logger.hasHandlers():
+            for handler in logger.handlers:
+                if handler.stream == sys.stdout:
+                    verbose = True
+                    break
+
+        is_random_state_kw = False
+        if "random_state" in inspect.signature(config.func).parameters:
+            is_random_state_kw = True
+
+        for lsize in make_iter(lsizes, verbose, desc="Sizes"):
+            scores = []
+            for random_state in make_iter(
+                random_states, verbose, desc="\tRandom states"
+            ):
+                if is_random_state_kw:
+                    model = config(random_state=random_state)
+                else:
+                    model = config()
+
+                x_train, x_test, y_train, y_test = train_test_split(
+                    x, y, train_size=lsize, stratify=y, random_state=random_state
+                )
+
+                if ssl:
+                    model.fit(x_train, y_train, x_test)
+                else:
+                    model.fit(x_train, y_train)
+                preds = model.predict(x_test)
+                scores.append(accuracy_score(preds, y_test))
+
+            logger.info(
+                "Labeled size = {} (ratio {:.3f}), accuracy = {:.5f}.".format(
+                    lsize, lsize / len(y_test), np.mean(scores)
+                )
+            )

@@ -1,12 +1,11 @@
+import os
 import sys
-
-from pathlib import Path
 
 from sklearn.ensemble import RandomForestClassifier
 
 # Path to directory with sslearn folder if not in the PATH already.
-path = str(Path(__file__).resolve().parents[2])
-sys.path.append(path)
+sslearn_root = os.path.dirname(__file__)
+sys.path.append(sslearn_root)
 
 # Import algorithm to test.
 from sslearn.models.sla._customs import BinarySLARandomForestClassifier  # noqa
