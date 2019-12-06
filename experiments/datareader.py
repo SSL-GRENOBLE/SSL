@@ -21,7 +21,6 @@ def binarize_multi(x, y, *labels):
     y = y[mask]
     y[y == labels[0]] = 0
     y[y == labels[1]] = 1
-    print(x.shape, y.shape)
     return x, y
 
 

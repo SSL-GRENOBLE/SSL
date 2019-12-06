@@ -6,14 +6,14 @@
     },
     "fashion_mnist": {
         "urls": [
-            "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz",
-            "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz"
+            "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz",
+            "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz"
         ]
     },
     "mnist": {
         "urls": [
-            "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
-            "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz"
+            "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
+            "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz"
         ]
     },
     "pendigits": {

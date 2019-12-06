@@ -1,12 +1,14 @@
 {
     "model": "sla",
     "benchmarks": [
-        "banknotes"
+        "banknotes",
+        "pendigits_4_9",
+        "fashion_mnist_4_9"
     ],
     "log": "True",
-    "n_states": 10,
+    "n_states": 1,
     "lsizes": [
-        10, 30, 50
+        10
     ],
     "config_path": "demo/config.py",
     "data_root": "demo/.data",
