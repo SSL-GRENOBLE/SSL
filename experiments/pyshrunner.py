@@ -43,7 +43,7 @@ class ShellTestRunner(object):
     def run(self, **test_params: dict) -> None:
         shell_cmd = "{} {} {}".format(
             self.py_cmd,
-            os.path.join(Path(__file__).resolve().parents[0], "run.py"),
+            os.path.join(Path(__file__).resolve().parents[0], "shrun.py"),
             ShellKwargConstructor(**test_params).to_shell(),
         )
         call(shell_cmd, shell=True)

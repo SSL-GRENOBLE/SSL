@@ -11,7 +11,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
-from dataloaders import DataReader
+from datareader import DataReader
 from utils import make_iter, setup_logger
 
 
@@ -126,11 +126,12 @@ class Tester(object):
     def __init__(
         self,
         configuration: TestConfiguration,
+        data_root: str,
         random_states: List[int],
         lsizes: List[int],
         verbose: bool = True,
         log: bool = False,
-        log_root: Optional[str] = ".",
+        log_root: Optional[str] = None,
     ) -> None:
         """
             configuration: Model configurations to be tested.
@@ -143,6 +144,7 @@ class Tester(object):
                 Stores log in `.ssl_test_logs` in `log_root`.
         """
         self.configuration = configuration
+        self.data_root = data_root
         self.random_states = random_states
         self.lsizes = lsizes
 
@@ -158,15 +160,15 @@ class Tester(object):
         self.logger.info(f"Model params: {self.configuration.model_inits}.")
         self.logger.info(f"Baseline params: {self.configuration.baseline_inits}.")
 
-    def run(self, root: str, benchmarks: Union[str, List[str]]) -> None:
+    def run(self, benchmarks: Union[str, List[str]]) -> None:
         """
         Arguments:
             root: Path to folder with datasets.
             benchmarks: Names of datasets to test.
         """
-        reader = DataReader(root)
         if isinstance(benchmarks, str):
             benchmarks = [benchmarks]
+        reader = DataReader(self.data_root)
         self.logger.info("\n" + "-" * 5 + " Testing " + "-" * 5)
         for benchmark in make_iter(benchmarks, self.verbose, "Benchmarks"):
             self.logger.info("\n" + f"... Testing benchmark {benchmark}.")

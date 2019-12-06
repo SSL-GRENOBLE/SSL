@@ -75,7 +75,7 @@ class SSLTrainSet(object):
         if mask.dtype == np.bool:
             return np.compress(mask, self._udata, axis=0)
         elif mask.dtype == np.int:
-            return np.take(mask, self._udata, axis=0)
+            return np.take(self._udata, mask, axis=0)
         raise ValueError(f"Mask dtype should be bool or int, got {mask.dtype}.")
 
     def _compress_udata(self, mask: np.ndarray) -> None:

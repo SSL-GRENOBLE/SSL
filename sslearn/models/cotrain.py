@@ -22,7 +22,7 @@ def get_utol_mask(
     elif co_mode in ["best", "random"]:
         probs = model.predict(udata)
         if co_mode == "best":
-            pos = np.argsort(np.max(probs, axis=1))[::-1][:co_size]
+            pos = np.argsort(np.max(probs, axis=0))[::-1][:co_size]
         else:
             if len(probs) >= co_size:
                 pos = np.random.choice(len(probs), size=co_size, replace=False)

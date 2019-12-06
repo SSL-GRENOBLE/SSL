@@ -1,0 +1,14 @@
+{
+    "model": "sla",
+    "benchmarks": [
+        "banknotes"
+    ],
+    "log": "True",
+    "n_states": 10,
+    "lsizes": [
+        10, 30, 50
+    ],
+    "config_path": "demo/config.py",
+    "data_root": "demo/.data",
+    "log_root": "demo/"
+}

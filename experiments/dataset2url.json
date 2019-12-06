@@ -1,0 +1,30 @@
+{
+    "banknotes": {
+        "urls": [
+            "https://archive.ics.uci.edu/ml/machine-learning-databases/00267/data_banknote_authentication.txt"
+        ]
+    },
+    "fashion_mnist": {
+        "urls": [
+            "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz",
+            "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz"
+        ]
+    },
+    "mnist": {
+        "urls": [
+            "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
+            "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz"
+        ]
+    },
+    "pendigits": {
+        "urls": [
+            "https://pkgstore.datahub.io/machine-learning/pendigits/pendigits_csv/data/5bd8133def1eb9ba7139eaaa82d89f63/pendigits_csv.csv"
+        ]
+    },
+    "telescope": {
+        "urls": [
+            "https://archive.ics.uci.edu/ml/machine-learning-databases/magic/magic04.data",
+            "https://archive.ics.uci.edu/ml/machine-learning-databases/magic/magic04.names"
+        ]
+    }
+}
