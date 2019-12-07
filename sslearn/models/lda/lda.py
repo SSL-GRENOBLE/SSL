@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import linalg
-from utils import class_cov, class_means, softmax
+from .utils import class_cov, class_means, softmax
 
 
 class LinearDiscriminantAnalysis:

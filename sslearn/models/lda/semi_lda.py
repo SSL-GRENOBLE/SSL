@@ -1,11 +1,12 @@
 import numpy as np
+
 from scipy import linalg
 from scipy.stats import multivariate_normal
-from LinearDiscriminantAnalysis import LinearDiscriminantAnalysis
-from utils import projection_prob_simplex, softmax
-
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+
+from .lda import LinearDiscriminantAnalysis
+from .utils import projection_prob_simplex, softmax
 
 
 class SemiSupervisedLinearDiscriminantAnalysis:
