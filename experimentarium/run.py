@@ -17,6 +17,11 @@ DEFAULT_LOG_ROOT = "../../"
 DEFAULT_CONFIG_PATH = "../config.py"
 
 
+class ConfigError(Exception):
+    """Exception when wrong config given."""
+    __module__ = Exception.__module__
+
+
 def absolutize(path: str) -> str:
     """Make relative path absolute w.r.t. current file."""
     if not os.path.isabs(path):
@@ -45,9 +50,7 @@ def check_benchmarks(args) -> None:
     unknown = []
     for benchmark in args.benchmarks:
         if benchmark not in dataset2dir:
-            unknown.append(benchmark)
-    if unknown:
-        raise ValueError(f"The following datasets not supported: {' '.join(unknown)}.")
+            raise ValueError(f"Datset is not supported: {benchmark}.")
 
     unknown = []
     web_loader = WebDataDownloader(args.data_root)
@@ -107,9 +110,18 @@ def check_input(args: argparse.Namespace) -> None:
     check_config(args)
 
     if args.baseline is None:
-        for key in args.configs:
-            args.configs[key]["baseline_cls"] = None
-            args.configs[key]["baseline_inits"] = None
+        for model in args.configs:
+            args.configs[model]["baseline_cls"] = None
+            args.configs[model]["baseline_inits"] = dict()
+
+    for model, params in args.configs.items():
+        if "model_cls" not in params and "baseline_cls" not in params:
+            raise ConfigError(f"No testing classes are given for model: {model}.")
+
+    for model in args.configs:
+        for key in ["model_inits", "baseline_inits"]:
+            if key not in args.configs[model]:
+                args.configs[model][key] = dict()
 
     if args.lsizes is None:
         args.lsizes = [50]
