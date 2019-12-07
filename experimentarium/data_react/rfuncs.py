@@ -7,10 +7,17 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 
-def binarize_multi(x, y, *labels):
-    if len(labels) != 2:
-        raise ValueError(f"Accepts only two numbers, got {len(labels)}.")
-    mask = np.logical_or((y == labels[0]), (y == y[1]))
+def pair_binarize_multi(x: np.ndarray, y: np.ndarray, label, label_other):
+    """Binarizes multiclass dataset w.r.t. `label` and `label_other`.
+
+    Arguments:
+        x: Array of features.
+        y: Array of labels.
+        label: The first label to extract, negative class.
+        label_other: The second label to extract, positive class.
+    """
+    labels = [label, label_other]
+    mask = np.logical_or((y == labels[0]), (y == labels[1]))
     x = x[mask, :]
     y = y[mask]
     y[y == labels[0]] = 0
@@ -39,15 +46,15 @@ def read_pendigits(root: str):
 
 
 def read_pendigits_4_9(root: str):
-    return binarize_multi(*read_pendigits(root), 4, 9)
+    return pair_binarize_multi(*read_pendigits(root), 4, 9)
 
 
 def read_mnist_4_9(root: str):
-    return binarize_multi(*_read_mnists(root), 4, 9)
+    return pair_binarize_multi(*_read_mnists(root), 4, 9)
 
 
 def read_fashion_mnist_4_9(root: str):
-    return binarize_multi(*_read_mnists(root), 4, 9)
+    return pair_binarize_multi(*_read_mnists(root), 4, 9)
 
 
 def read_telescope(root: str):

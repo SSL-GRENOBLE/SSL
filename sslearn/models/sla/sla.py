@@ -61,8 +61,11 @@ def infer_theta(margins: np.ndarray) -> float:
             mask_gamma_l = margins < gamma
             mean_gamma_l = np.mean(margins * mask_gamma_l)
 
-            # The first term, which is Gibbs risk, is just an estimation.
-            k_u = 0.5 + 0.5 * (np.mean(margins) - 1)
+            # The first term, which is Gibbs risk, is just an upper estimation, so
+            # explicitly there should be the following line.
+            # k_u = 0.5 + 0.5 * (np.mean(margins) - 1)
+            # After reduction it becomes:
+            k_u = np.mean(margins) / 2
             k_u += mean_theta_leq - mean_gamma_l
             if k_u <= 0:
                 k_u = 0
