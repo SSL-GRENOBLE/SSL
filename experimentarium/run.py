@@ -10,7 +10,7 @@ from data_react.webloader import WebDataDownloader
 
 warnings.filterwarnings("ignore")
 
-MODELS = {"sla", "rf", "lda"}
+MODELS = {"sla", "rf", "lda", "lgc"}
 
 DEFAULT_DATA_ROOT = "../../data/"
 DEFAULT_LOG_ROOT = "../../"
