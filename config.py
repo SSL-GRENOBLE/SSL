@@ -13,6 +13,7 @@ from sslearn.models.lda import (
     SemiSupervisedLinearDiscriminantAnalysis,
     LinearDiscriminantAnalysis,
 )
+from sslearn.models.lgc import LGC
 
 
 configs = {
@@ -27,8 +28,13 @@ configs = {
         },
         "baseline_inits": {"n_estimators": 100},
     },
+
     "lda": {
         "model_cls": SemiSupervisedLinearDiscriminantAnalysis,
         "baseline_cls": LinearDiscriminantAnalysis
+    },
+
+    "lgc": {
+        "model_cls": LGC,
     },
 }
