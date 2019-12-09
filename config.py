@@ -14,7 +14,10 @@ from sslearn.models.lda import (
     LinearDiscriminantAnalysis,
 )
 from sslearn.models.lgc import LGC
-
+from sslearn.models.rf import (
+    SemiSupervisedRandomForest,
+    RandomForest,
+)
 
 configs = {
     "sla": {
@@ -36,5 +39,10 @@ configs = {
 
     "lgc": {
         "model_cls": LGC,
+    },
+
+    "rf": {
+        "model_cls": SemiSupervisedRandomForest,
+        "baseline_cls": RandomForest,
     },
 }
