@@ -82,15 +82,15 @@ def check_benchmarks(args) -> None:
     unknown = []
     web_loader = WebDataDownloader(args.data_root)
     for benchmark in args.benchmarks:
-        main_benchmark = dataset2dir[benchmark]
-        path = os.path.join(args.data_root, main_benchmark)
+        folder = dataset2dir[benchmark]["folder"]
+        path = os.path.join(args.data_root, folder)
         if not os.path.exists(path):
-            unknown.append(main_benchmark)
+            unknown.append(folder)
         else:
-            for url in web_loader.dir2url[main_benchmark]["urls"]:
+            for url in web_loader.dir2url[folder]["urls"]:
                 _, filename = os.path.split(url)
                 if not os.path.exists(os.path.join(path, filename)):
-                    unknown.append(main_benchmark)
+                    unknown.append(folder)
 
     if unknown:
         not_found = []

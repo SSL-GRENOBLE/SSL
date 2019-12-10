@@ -16,6 +16,6 @@ class DataReader(object):
     def read(self, benchmark: str):
         if benchmark not in self.dataset2dir:
             raise ValueError(f"No support for {benchmark} yet.")
-        folder = os.path.join(self.data_root, self.dataset2dir[benchmark])
+        folder = os.path.join(self.data_root, self.dataset2dir[benchmark]["folder"])
         func = getattr(rfuncs, f"read_{benchmark}")
         return func(folder)

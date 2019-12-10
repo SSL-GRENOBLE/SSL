@@ -1,11 +1,38 @@
 {
-    "banknotes": "banknotes",
-    "telescope": "telescope",
-    "mnist_4_9": "mnist",
-    "pendigits_4_9": "pendigits",
-    "fashion_mnist_4_9": "fashion_mnist",
-    "breast_w": "breast_w",
-    "vehicles": "vehicle",
-    "balance_scale": "balance_scale",
-    "kr_vs_kp": "kr_vs_kp"
+    "banknotes": {
+        "folder": "banknotes",
+        "tags": []
+    },
+    "telescope": {
+        "folder": "telescope",
+        "tags": []
+    },
+    "mnist_4_9": {
+        "folder": "mnist",
+        "tags": []
+    },
+    "pendigits_4_9": {
+        "folder": "pendigits",
+        "tags": []
+    },
+    "fashion_mnist_4_9": {
+        "folder": "fashion_mnist",
+        "tags": []
+    },
+    "breast_w": {
+        "folder": "breast_w",
+        "tags": []
+    },
+    "vehicles": {
+        "folder": "vehicle",
+        "tags": []
+    },
+    "balance_scale": {
+        "folder": "balance_scale",
+        "tags": []
+    },
+    "kr_vs_kp": {
+        "folder": "kr_vs_kp",
+        "tags": []
+    }
 }
