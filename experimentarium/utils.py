@@ -48,7 +48,7 @@ def setup_logger(
         if not os.path.exists(log_root):
             os.mkdir(log_root)
         log_path = os.path.join(
-            log_root, f'{datetime.now().strftime("%H-%M-%S_%Y-%m-%d.txt")}'
+            log_root, f'{datetime.now().strftime("%H-%M-%S-%Y-%m-%d.txt")}'
         )
         open(log_path, "w").close()
         file_handler = logging.FileHandler(log_path)
@@ -58,6 +58,7 @@ def setup_logger(
 
 class ShellKwargConstructor(object):
     """Construct experimentarium run arguments from given arguments."""
+
     def __init__(self, **kwargs) -> None:
         self.kwargs = dict()
         for key, value in kwargs.items():
@@ -65,8 +66,12 @@ class ShellKwargConstructor(object):
 
     def _process(self, key, value):
         if key == "lsizes":
+            if isinstance(value, int):
+                value = [value]
             self.kwargs[key] = " ".join([str(el) for el in value])
-        elif key == "benchmarks":
+        elif key in ["model", "benchmarks"]:
+            if isinstance(value, str):
+                value = [value]
             self.kwargs[key] = " ".join(value)
         else:
             self.kwargs[key] = value

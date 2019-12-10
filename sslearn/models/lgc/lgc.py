@@ -24,10 +24,10 @@ class LGC:
     def predict(self, data: np.ndarray) -> np.ndarray:
         X = np.vstack([self.ldata, data])
 
-        Y = np.zeros((X.shape[0], self.labels.max() + 1), dtype='int')
+        Y = np.zeros((X.shape[0], self.labels.max() + 1), dtype="int")
         Y[np.arange(self.labels.size), self.labels] = 1
 
-        dm = cdist(X, X, 'euclidean')
+        dm = cdist(X, X, "euclidean")
         rbf = lambda x, sigma: np.exp(-x / (2 * self.sigma ** 2))
         vfunc = np.vectorize(rbf)
         W = vfunc(dm, self.sigma)
@@ -42,4 +42,4 @@ class LGC:
         for _ in range(self.n_iter):
             F = np.dot(S, F) * self.alpha + (1 - self.alpha) * Y
 
-        return F.argmax(axis=1)[self.labels.size:]
+        return F.argmax(axis=1)[self.labels.size :]

@@ -4,8 +4,9 @@ import random
 from scipy.stats import bernoulli
 import numpy as np
 
+
 class SemiSupervisedRandomForest(RandomForest):
-    def __init__(self, random_state, T0 = 0.2, alpha = 0.1, c0 = 1.1):
+    def __init__(self, random_state, T0=0.2, alpha=0.1, c0=1.1):
         super().__init__(random_state)
         self.T0 = T0
         self.c0 = c0
@@ -17,17 +18,17 @@ class SemiSupervisedRandomForest(RandomForest):
             Z = 0
             newprobs_i = []
             for p in probs[i]:
-                #newp = p**(-alpha/T)/np.exp(1) if p > 0 else 0
-                newp = np.exp(-(alpha*np.log2(p) + T)/T) if p > 0 else 0
+                # newp = p**(-alpha/T)/np.exp(1) if p > 0 else 0
+                newp = np.exp(-(alpha * np.log2(p) + T) / T) if p > 0 else 0
                 newprobs_i.append(newp)
                 Z += newp
-            
+
             if np.isinf(Z) or np.any(np.isinf(newprobs_i)):
                 return [], True
-            newprobs_i = [p/Z for p in newprobs_i]
+            newprobs_i = [p / Z for p in newprobs_i]
             newprobs.append(newprobs_i)
         return newprobs, False
-    
+
     def __retrain_random_forest(self, x_l, y_l, x_u, p):
         oobe = 0
         np.random.seed(self.random_state)
@@ -46,41 +47,53 @@ class SemiSupervisedRandomForest(RandomForest):
                     oobe += rfTree.count_oobe(x_oob, y_oob)
                     break
                 if j == 9:
-                    sys.exit("WARNING: We couldnt find good data fot tree#"+str(i))
+                    sys.exit("WARNING: We couldnt find good data fot tree#" + str(i))
         oobe /= self.N
         return oobe
-    
+
     def fit(self, x_l, y_l, x_u):
         random.seed(self.random_state)
         steps = 20
-        #T0 = 0.2 # T_m ~ T0*exp^(-m) - cooling function
-        #alpha = 0.1
-        super().fit(x_l, y_l) # train RF with labeled data
+        # T0 = 0.2 # T_m ~ T0*exp^(-m) - cooling function
+        # alpha = 0.1
+        super().fit(x_l, y_l)  # train RF with labeled data
         Told = self.T0
-        m = 0 # set epoch
+        m = 0  # set epoch
         oobe = 0
         while True:
-            Tnew = Told/self.c0
+            Tnew = Told / self.c0
             m = m + 1
             target = self.predict_proba(x_u)
-            newtarget, is_overflow = self.__change_distribution(target, self.alpha, Tnew)
+            newtarget, is_overflow = self.__change_distribution(
+                target, self.alpha, Tnew
+            )
             if is_overflow:
-                #print("Overflow happened, stopped after ", m, " steps")
+                # print("Overflow happened, stopped after ", m, " steps")
                 break
             p = [x[1] for x in newtarget]
-            
+
             oobe = self.__retrain_random_forest(x_l, y_l, x_u, p)
             Told = Tnew
             if m >= steps:
                 break
         if oobe > self.oobe:
-            print("[D]Semi-supervised approach was discarded with oobe: "+str(oobe)+", oobe for pure RF: "+str(self.oobe))
+            print(
+                "[D]Semi-supervised approach was discarded with oobe: "
+                + str(oobe)
+                + ", oobe for pure RF: "
+                + str(self.oobe)
+            )
             random.seed(self.random_state)
             super().fit(x_l, y_l)
-            
+
         else:
-            print("[A]Semi-supervised approach was accepted with oobe: "+str(oobe)+", oobe for pure RF: "+str(self.oobe))
+            print(
+                "[A]Semi-supervised approach was accepted with oobe: "
+                + str(oobe)
+                + ", oobe for pure RF: "
+                + str(self.oobe)
+            )
             self.oobe = oobe
-    
+
     def predict(self, x):
         return super().predict(x)

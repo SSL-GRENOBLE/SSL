@@ -2,13 +2,13 @@ import logging
 import inspect
 import sys
 
+from collections import defaultdict
 from functools import partial
-
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import numpy as np
 
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import train_test_split
 
 from data_react.reader import DataReader
@@ -63,6 +63,8 @@ class MasterConfiguration(object):
 
 
 class TestRunner(object):
+    """Test runner for single model configuration."""
+
     def __init__(
         self,
         configuration: MasterConfiguration,
@@ -74,6 +76,7 @@ class TestRunner(object):
         log_root: Optional[str] = None,
     ) -> None:
         """
+            name: Model name.
             configuration: Model configurations to be tested.
             random_states: Random states.
             lsizes: Labelled examples sizes.
@@ -87,9 +90,9 @@ class TestRunner(object):
         self.data_root = data_root
         self.random_states = random_states
         self.lsizes = lsizes
+        self.stats_ = []
+        self.__stats = {}
 
-        if verbose is False and log is False:
-            raise ValueError("No results may be reached.")
         self.verbose = verbose
         self.log = log
         self.logger = setup_logger(verbose, log, log_root)
@@ -112,10 +115,14 @@ class TestRunner(object):
         self.logger.info("\n" + "-" * 5 + " Testing " + "-" * 5)
         for benchmark in make_iter(benchmarks, self.verbose, "Benchmarks"):
             self.logger.info("\n" + f"... Testing benchmark {benchmark}.")
+            self.__stats["benchmark"] = benchmark
             x, y = reader.read(benchmark)
+            self._test(x, y)
 
-            if self.configuration.model_cls is not None:
-                for model_config in self.configuration.model_configs:
+    def _test(self, x, y) -> None:
+        for mode in ["model", "baseline"]:
+            if getattr(self.configuration, f"{mode}_cls") is not None:
+                for model_config in getattr(self.configuration, f"{mode}_configs"):
                     self._test_config(
                         model_config,
                         x,
@@ -123,19 +130,7 @@ class TestRunner(object):
                         self.random_states,
                         self.lsizes,
                         self.logger,
-                        True,
-                    )
-
-            if self.configuration.baseline_cls is not None:
-                for model_config in self.configuration.baseline_configs:
-                    self._test_config(
-                        model_config,
-                        x,
-                        y,
-                        self.random_states,
-                        self.lsizes,
-                        self.logger,
-                        False,
+                        mode == "model",
                     )
 
     def _test_config(
@@ -146,16 +141,17 @@ class TestRunner(object):
         random_states: Union[Iterable[int], int] = 0,
         lsizes: Optional[Any] = None,
         logger: Optional[logging.Logger] = None,
-        ssl: bool = True,
+        is_ssl: bool = True,
     ) -> None:
         """
         Arguments:
             model: Model to test.
-            ssl: Whether model is semi-supervised.
+            is_ssl: Whether model is semi-supervised.
                 Default is True.
         """
         logger.info(
-            "\n" + f"...... Testing {'semisupervised' if ssl else 'supervised'} model:"
+            "\n"
+            + f"...... Testing {'semisupervised' if is_ssl else 'supervised'} model:"
         )
         logger.info(f"...... with configuration: {config.keywords or 'default'}.")
 
@@ -174,7 +170,8 @@ class TestRunner(object):
             is_random_state_kw = True
 
         for lsize in make_iter(lsizes, verbose, desc="Sizes"):
-            scores = []
+            self.__stats["lsize"] = lsize
+            scores = defaultdict(list)
             for random_state in make_iter(
                 random_states, verbose, desc="\tRandom states"
             ):
@@ -187,15 +184,24 @@ class TestRunner(object):
                     x, y, train_size=lsize, stratify=y, random_state=random_state
                 )
 
-                if ssl:
+                self.__stats["usize"] = len(x_test)
+
+                if is_ssl:
                     model.fit(x_train, y_train, x_test)
                 else:
                     model.fit(x_train, y_train)
                 preds = model.predict(x_test)
-                scores.append(accuracy_score(preds, y_test))
+                scores["accuracy"].append(accuracy_score(preds, y_test))
+                scores["f1"].append(f1_score(preds, y_test))
+
+            self.__stats["accuracy"] = np.mean(scores["accuracy"]).round(5)
+            self.__stats["f1"] = np.mean(scores["f1"]).round(5)
+            self.__stats["is_ssl"] = is_ssl
+            self.stats_.append(self.__stats.copy())
 
             logger.info(
-                "Labeled size = {} (ratio {:.3f}), accuracy = {:.5f}.".format(
-                    lsize, lsize / len(y_test), np.mean(scores)
+                f"Labeled size = {lsize} (ratio {lsize / len(y_test):.3f}). Metrics: "
+                "accuracy = {:.5f}., f1 = {:.5f}.".format(
+                    self.__stats["accuracy"], self.__stats["f1"]
                 )
             )
