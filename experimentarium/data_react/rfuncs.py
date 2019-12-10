@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import glob
 
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
 
 def pair_binarize_multi(x: np.ndarray, y: np.ndarray, label, label_other):
     """Binarizes multiclass dataset w.r.t. `label` and `label_other`.
