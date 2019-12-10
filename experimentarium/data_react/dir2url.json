@@ -1,30 +1,62 @@
 {
-    "banknotes": {
-        "urls": [
-            "https://archive.ics.uci.edu/ml/machine-learning-databases/00267/data_banknote_authentication.txt"
-        ]
-    },
-    "fashion_mnist": {
-        "urls": [
-            "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz",
-            "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz"
-        ]
-    },
-    "mnist": {
-        "urls": [
-            "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
-            "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz"
-        ]
-    },
-    "pendigits": {
-        "urls": [
-            "https://pkgstore.datahub.io/machine-learning/pendigits/pendigits_csv/data/5bd8133def1eb9ba7139eaaa82d89f63/pendigits_csv.csv"
-        ]
-    },
-    "telescope": {
-        "urls": [
-            "https://archive.ics.uci.edu/ml/machine-learning-databases/magic/magic04.data",
-            "https://archive.ics.uci.edu/ml/machine-learning-databases/magic/magic04.names"
-        ]
-    }
+  "banknotes": {
+    "urls": [
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/00267/data_banknote_authentication.txt"
+    ]
+  },
+  "fashion_mnist": {
+    "urls": [
+      "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz",
+      "http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz"
+    ]
+  },
+  "mnist": {
+    "urls": [
+      "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
+      "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz"
+    ]
+  },
+  "pendigits": {
+    "urls": [
+      "https://pkgstore.datahub.io/machine-learning/pendigits/pendigits_csv/data/5bd8133def1eb9ba7139eaaa82d89f63/pendigits_csv.csv"
+    ]
+  },
+  "telescope": {
+    "urls": [
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/magic/magic04.data",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/magic/magic04.names"
+    ]
+  },
+  "breast_w": {
+    "urls": [
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.data",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/breast-cancer-wisconsin.names"
+    ]
+  },
+  "vehicle": {
+    "urls": [
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/vehicle/xaa.dat",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/vehicle/xab.dat",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/vehicle/xac.dat",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/vehicle/xad.dat",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/vehicle/xae.dat",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/vehicle/xaf.dat",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/vehicle/xag.dat",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/vehicle/xah.dat",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/vehicle/xai.dat",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/statlog/vehicle/vehicle.doc"
+    ]
+  },
+  "balance_scale": {
+    "urls": [
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/balance-scale/balance-scale.data",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/balance-scale/balance-scale.names"
+    ]
+  },
+  "kr_vs_kp": {
+    "urls": [
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/chess/king-rook-vs-king-pawn/kr-vs-kp.data",
+      "https://archive.ics.uci.edu/ml/machine-learning-databases/chess/king-rook-vs-king-pawn/kr-vs-kp.names"
+    ]
+  }
 }
