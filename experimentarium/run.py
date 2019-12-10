@@ -124,7 +124,7 @@ def check_input(args: argparse.Namespace) -> None:
                 args.configs[model][key] = dict()
 
     if args.lsizes is None:
-        args.lsizes = [50]
+        args.lsizes = [10, 30, 50]
 
     args.random_states = list(range(args.n_states))
 

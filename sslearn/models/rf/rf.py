@@ -33,16 +33,23 @@ class RandomForest:
         y_i = [y[i] for i in range(0, len(x)) if i not in indices]
         return x_i, y_i
     
+    def _generate_tree_data(self, x, y, x_o, y_o):
+        for j in range(0, 10):
+           x_i, y_i, idx = self._prepare_train_data(x, y)
+           x_oob, y_oob = self._prepare_oob_data(x_o, y_o, idx)
+           if len(x_oob) != 0:
+               return x_i, y_i, x_oob, y_oob
+        sys.exit("WARNING: We couldnt find good data fot tree#"+str(i))
+
     def fit(self, x, y):
         random.seed(self.random_state)
         self.trees = []
         self.oobe = 0
         for i in range(0, self.N):
             rfTree = RFTree()
-            x_i, y_i, idx = self._prepare_train_data(x, y)
-            #print("Train tree with features of size: ", len(x_i[0]))
+            x_i, y_i, x_oob, y_oob = self._generate_tree_data(x, y, x, y)
+
             rfTree.train(x_i, y_i, self.random_state)
-            x_oob, y_oob = self._prepare_oob_data(x, y, idx)
             self.trees.append(rfTree)
             self.oobe += rfTree.count_oobe(x_oob, y_oob)
         
