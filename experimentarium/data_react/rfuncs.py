@@ -3,9 +3,9 @@ import os
 
 import numpy as np
 import pandas as pd
+import glob
 
 from sklearn.preprocessing import LabelEncoder
-
 
 def pair_binarize_multi(x: np.ndarray, y: np.ndarray, label, label_other):
     """Binarizes multiclass dataset w.r.t. `label` and `label_other`.
@@ -37,12 +37,36 @@ def _read_mnists(root: str):
     return x, y
 
 
+def _read_vehicles(root: str):
+    data = glob.glob(os.path.join(root, 'xa*.dat'))
+    df = pd.concat(map(lambda f: pd.read_csv(f, header=None, delim_whitespace=True), data))
+    x = df.values[:, :-1].astype(int)
+    y = LabelEncoder().fit_transform(df.values[:, -1])
+    return x, y
+
+
+def _read_balance_scale(root: str):
+    path = os.path.join(root, "balance-scale.data")
+    df = pd.read_csv(path, sep=",", header=None)
+    x = df.values[:, 1:].astype(int)
+    y = LabelEncoder().fit_transform(df.values[:, 0])
+    return x, y
+
+
 def read_pendigits(root: str):
     path = os.path.join(root, "pendigits_csv.csv")
     df = pd.read_csv(path, sep=",")
     x = df.values[:, :-1].astype(float)
     y = df.values[:, -1].astype(int)
     return x, y
+
+
+def read_vehicles(root: str):
+    return pair_binarize_multi(*_read_vehicles(root), 0, 1)
+
+
+def read_balance_scale(root: str):
+    return pair_binarize_multi(*_read_balance_scale(root), 0, 1)
 
 
 def read_pendigits_4_9(root: str):
@@ -70,4 +94,26 @@ def read_banknotes(root: str):
     df = pd.read_csv(path, sep=",", header=None)
     x = df.values[:, :-1].astype(float)
     y = df.values[:, -1].astype(int)
+    return x, y
+
+
+def read_breast_w(root: str):
+    path = os.path.join(root, "breast-cancer-wisconsin.data")
+    df = pd.read_csv(path, sep=",", header=None)
+    df = df.replace('?', np.nan)
+    df = df.dropna()
+    x = df.values[:, 1:-1].astype(int)
+    y = df.values[:, -1].astype(int)
+    y[y == 4] = 0
+    y[y == 2] = 1
+    return x, y
+
+
+def read_kr_vs_kp(root: str):
+    path = os.path.join(root, "kr-vs-kp.data")
+    df = pd.read_csv(path, sep=",", header=None)
+    df = df.apply(LabelEncoder().fit_transform)
+    print(df)
+    x = df.values[:, :-1]
+    y = df.values[:, -1]
     return x, y

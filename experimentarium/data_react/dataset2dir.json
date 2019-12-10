@@ -3,5 +3,9 @@
     "telescope": "telescope",
     "mnist_4_9": "mnist",
     "pendigits_4_9": "pendigits",
-    "fashion_mnist_4_9": "fashion_mnist"
+    "fashion_mnist_4_9": "fashion_mnist",
+    "breast_w": "breast_w",
+    "vehicles": "vehicle",
+    "balance_scale": "balance_scale",
+    "kr_vs_kp": "kr_vs_kp"
 }
