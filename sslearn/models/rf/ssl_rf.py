@@ -37,17 +37,9 @@ class SemiSupervisedRandomForest(RandomForest):
             x_train = np.concatenate((x_l, x_u))
             y_train = np.concatenate((y_l, y_hat))
             rfTree = self.trees[i]
-            for j in range(0, 10):
-                x_i, y_i, idx = self._prepare_train_data(x_train, y_train)
-                x_oob, y_oob = self._prepare_oob_data(x_l, y_l, idx)
-                if len(x_oob) == 0:
-                    pass
-                else:
-                    rfTree.train(x_i, y_i, self.random_state)
-                    oobe += rfTree.count_oobe(x_oob, y_oob)
-                    break
-                if j == 9:
-                    sys.exit("WARNING: We couldnt find good data fot tree#" + str(i))
+            x_i, y_i, x_oob, y_oob = self._generate_tree_data(x_train, y_train, x_l, y_l)
+            rfTree.train(x_i, y_i, self.random_state)
+            oobe += rfTree.count_oobe(x_oob, y_oob)
         oobe /= self.N
         return oobe
 
