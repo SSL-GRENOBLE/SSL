@@ -19,6 +19,7 @@ DEFAULT_CONFIG_PATH = "../config.py"
 
 class ConfigError(Exception):
     """Exception when wrong config given."""
+
     __module__ = Exception.__module__
 
 
@@ -124,7 +125,7 @@ def check_input(args: argparse.Namespace) -> None:
                 args.configs[model][key] = dict()
 
     if args.lsizes is None:
-        args.lsizes = [10, 30, 50]
+        args.lsizes = [30]
 
     args.random_states = list(range(args.n_states))
 
