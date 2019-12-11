@@ -116,7 +116,6 @@ def read_kr_vs_kp(root: str):
     path = os.path.join(root, "kr-vs-kp.data")
     df = pd.read_csv(path, sep=",", header=None)
     df = df.apply(LabelEncoder().fit_transform)
-    print(df)
     x = df.values[:, :-1]
     y = df.values[:, -1]
     return x, y

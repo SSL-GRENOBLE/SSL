@@ -1,0 +1,31 @@
+{
+    "data2dir": {
+        "banknotes": "banknotes",
+        "telescope": "telescope",
+        "mnist_4_9": "mnist",
+        "pendigits_4_9": "pendigits",
+        "fashion_mnist_4_9": "fashion_mnist",
+        "breast_w": "breast_w",
+        "vehicles": "vehicle",
+        "balance_scale": "balance_scale",
+        "kr_vs_kp": "kr_vs_kp"
+    },
+    "tag2data": {
+        "general": [
+            "banknotes",
+            "telescope",
+            "mnist_4_9",
+            "pendigits_4_9",
+            "fashion_mnist_4_9"
+        ],
+        "causal": [
+            "breast_w",
+            "vehicles",
+            "balance_scale",
+            "kr_vs_kp"
+        ],
+        "lowdense": [],
+        "clustering": [],
+        "manifold": []
+    }
+}
