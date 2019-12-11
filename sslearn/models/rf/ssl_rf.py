@@ -15,7 +15,7 @@ class SemiSupervisedRandomForest(RandomForest):
             max_iter - number of iterations
     """
 
-    def __init__(self, random_state, T0=0.005, alpha=0.1, c0=1.1, max_iter=20):
+    def __init__(self, random_state, T0=0.005, alpha=0.1, c0=1.1, max_iter=1):
         super().__init__(random_state)
         self.T0 = T0
         self.c0 = c0
@@ -102,7 +102,7 @@ class SemiSupervisedRandomForest(RandomForest):
             if is_overflow:
                 break
             oobe = self.__update_random_forest(X_l, y_l, X_u, p_new, labels)
-            print("OOBE =", oobe, " on step m=", m)
+            # print("OOBE =", oobe, " on step m=", m)
 
         if oobe > self.oobe:
             print(
