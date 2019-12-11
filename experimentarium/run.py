@@ -1,8 +1,10 @@
 import argparse
+import datetime
 import distutils.util
-import json
 import importlib.util
+import json
 import os
+import pandas as pd
 import warnings
 
 from configurator import MasterConfiguration, TestRunner
@@ -10,15 +12,16 @@ from data_react.webloader import WebDataDownloader
 
 warnings.filterwarnings("ignore")
 
-MODELS = {"sla", "rf", "lda", "lgc", "clustering"}
 
 DEFAULT_DATA_ROOT = "../../data/"
 DEFAULT_LOG_ROOT = "../../"
+DEFAULT_RESULTS_ROOT = "../../results"
 DEFAULT_CONFIG_PATH = "../config.py"
 
 
 class ConfigError(Exception):
     """Exception when wrong config given."""
+
     __module__ = Exception.__module__
 
 
@@ -36,11 +39,33 @@ def extract_configs(args):
     args.configs = cmodule.configs
 
 
+def check_config(args) -> None:
+    if not os.path.exists(args.config_path):
+        raise FileNotFoundError(f"No config found at {args.config_path}.")
+    try:
+        extract_configs(args)
+    except AttributeError:
+        raise AttributeError(f"No proper configuration in {args.config_path}.")
+
+
 def check_model(args) -> None:
-    if args.model is None:
-        raise ValueError("No model given.")
-    if args.model not in MODELS:
-        raise ValueError(f"Unknown model name.")
+    if args.model[0] == "all":
+        args.model = list(args.configs)
+    else:
+        for model in args.model:
+            if model not in args.configs:
+                raise ValueError(f"No configuration for {model}.")
+
+    for model in args.model:
+        if not args.baseline or "baseline_cls" not in args.configs[model]:
+            args.configs[model]["baseline_cls"] = None
+        for key in ["model_inits", "baseline_inits"]:
+            if key not in args.configs[model]:
+                args.configs[model][key] = dict()
+
+    for model, params in args.configs.items():
+        if "model_cls" not in params and "baseline_cls" not in params:
+            raise ConfigError(f"No testing classes are given for model: {model}.")
 
 
 def check_benchmarks(args) -> None:
@@ -48,22 +73,25 @@ def check_benchmarks(args) -> None:
         dataset2dir = json.load(f)
 
     unknown = []
-    for benchmark in args.benchmarks:
-        if benchmark not in dataset2dir:
-            raise ValueError(f"Datset is not supported: {benchmark}.")
+    if args.benchmarks[0] == "all":
+        args.benchmarks = list(dataset2dir)
+    else:
+        for benchmark in args.benchmarks:
+            if benchmark not in dataset2dir:
+                raise ValueError(f"Dataset is not supported: {benchmark}.")
 
     unknown = []
     web_loader = WebDataDownloader(args.data_root)
     for benchmark in args.benchmarks:
-        main_benchmark = dataset2dir[benchmark]
-        path = os.path.join(args.data_root, main_benchmark)
+        folder = dataset2dir[benchmark]["folder"]
+        path = os.path.join(args.data_root, folder)
         if not os.path.exists(path):
-            unknown.append(main_benchmark)
+            unknown.append(folder)
         else:
-            for url in web_loader.dir2url[main_benchmark]["urls"]:
+            for url in web_loader.dir2url[folder]["urls"]:
                 _, filename = os.path.split(url)
                 if not os.path.exists(os.path.join(path, filename)):
-                    unknown.append(main_benchmark)
+                    unknown.append(folder)
 
     if unknown:
         not_found = []
@@ -78,50 +106,21 @@ def check_benchmarks(args) -> None:
             )
 
 
-def check_config(args) -> None:
-    if not os.path.exists(args.config_path):
-        raise FileNotFoundError(f"No config found at {args.config_path}.")
-    try:
-        extract_configs(args)
-    except AttributeError:
-        raise AttributeError(f"No proper configuration in {args.config_path}.")
-
-    if args.model not in args.configs:
-        raise ValueError(f"No configuration for {args.model}.")
-
-
 def check_input(args: argparse.Namespace) -> None:
     """Check command line arguments.
 
     Arguments:
         args: Parsed command line arguments.
     """
-    if not os.path.isabs(args.data_root):
-        args.data_root = absolutize(args.data_root)
+    for attr in ["data_root", "log_root", "config_path", "results_root"]:
+        setattr(args, attr, absolutize(getattr(args, attr)))
 
-    if not os.path.isabs(args.log_root):
-        args.log_root = absolutize(args.log_root)
+    if not os.path.exists(args.results_root):
+        os.mkdir(args.results_root)
 
-    if not os.path.isabs(args.config_path):
-        args.config_path = absolutize(args.config_path)
-
+    check_config(args)
     check_model(args)
     check_benchmarks(args)
-    check_config(args)
-
-    if args.baseline is None:
-        for model in args.configs:
-            args.configs[model]["baseline_cls"] = None
-            args.configs[model]["baseline_inits"] = dict()
-
-    for model, params in args.configs.items():
-        if "model_cls" not in params and "baseline_cls" not in params:
-            raise ConfigError(f"No testing classes are given for model: {model}.")
-
-    for model in args.configs:
-        for key in ["model_inits", "baseline_inits"]:
-            if key not in args.configs[model]:
-                args.configs[model][key] = dict()
 
     if args.lsizes is None:
         args.lsizes = [50]
@@ -131,9 +130,11 @@ def check_input(args: argparse.Namespace) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", type=str, help="Model to train", required=True)
+    parser.add_argument(
+        "--model", type=str, nargs="+", help="Model(s) to train", required=True
+    )
     parser.add_argument("--benchmarks", nargs="+", type=str, required=True)
-    parser.add_argument("--data_root", type=str)
+    parser.add_argument("--data_root", type=str, help="Path to folder with dataset.")
     parser.add_argument(
         "--baseline",
         help="Whether to train baseline model",
@@ -155,27 +156,40 @@ if __name__ == "__main__":
     parser.add_argument(
         "--log_root", type=str, help="Folder to store logs, if logging is on"
     )
+    parser.add_argument(
+        "--results_root", type=str, help="Folder to store testing result."
+    )
 
     parser.set_defaults(
         n_states=10,
         log="True",
         verbose="True",
         baseline="True",
-        check_input="True",
         data_root=DEFAULT_DATA_ROOT,
         log_root=DEFAULT_LOG_ROOT,
         config_path=DEFAULT_CONFIG_PATH,
+        results_root=DEFAULT_RESULTS_ROOT,
     )
 
     args = parser.parse_args()
     check_input(args)
 
-    TestRunner(
-        MasterConfiguration(**args.configs[args.model]),
-        args.data_root,
-        args.random_states,
-        args.lsizes,
-        args.verbose,
-        args.log,
-        args.log_root,
-    ).run(args.benchmarks)
+    session_results_root = os.path.join(
+        args.results_root, datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")
+    )
+    os.mkdir(session_results_root)
+    for model in args.model:
+        config = args.configs[model]
+        runner = TestRunner(
+            MasterConfiguration(**config),
+            args.data_root,
+            args.random_states,
+            args.lsizes,
+            args.verbose,
+            args.log,
+            args.log_root,
+        )
+        runner.run(args.benchmarks)
+        pd.DataFrame(runner.stats_).to_csv(
+            os.path.join(session_results_root, f"{model}.csv"), sep=" "
+        )
