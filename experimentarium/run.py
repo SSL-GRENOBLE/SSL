@@ -123,7 +123,7 @@ def check_input(args: argparse.Namespace) -> None:
     check_benchmarks(args)
 
     if args.lsizes is None:
-        args.lsizes = [30]
+        args.lsizes = [10, 30, 50]
 
     args.random_states = list(range(args.n_states))
 
