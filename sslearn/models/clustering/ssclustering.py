@@ -14,7 +14,7 @@ class SSClustering(object):
         distance = squareform(pdist(X))  # pairwise distance
         n = X.shape[0]
 
-        is_visited = np.zeros(n, dtype='bool')
+        is_visited = np.zeros(n, dtype="bool")
         clusters = []
 
         for i in range(n):
@@ -44,7 +44,7 @@ class SSClustering(object):
 
         self.n_clusters = len(clusters)
         labeled_size = ldata.shape[0]
-        new_labels = np.zeros(n, dtype='int') - 1
+        new_labels = np.zeros(n, dtype="int") - 1
         new_labels[:labeled_size] = labels
 
         for cluster_indices in clusters:
@@ -54,7 +54,11 @@ class SSClustering(object):
             cluster_labels = labels[labeled_cluster_indices]
             labels_counter = Counter(cluster_labels).most_common()
 
-            if len(labels_counter) == 0 or len(labels_counter) > 1 and labels_counter[0][1] == labels_counter[1][1]:
+            if (
+                len(labels_counter) == 0
+                or len(labels_counter) > 1
+                and labels_counter[0][1] == labels_counter[1][1]
+            ):
                 continue
 
             main_label = labels_counter[0][0]

@@ -28,7 +28,9 @@ class ConfigError(Exception):
 def absolutize(path: str) -> str:
     """Make relative path absolute w.r.t. current file."""
     if not os.path.isabs(path):
-        path = os.path.abspath(os.path.join(os.path.dirname(__file__), path))
+        path = os.path.normpath(
+            os.path.abspath(os.path.join(os.path.dirname(__file__), path))
+        )
     return path
 
 
@@ -123,7 +125,7 @@ def check_input(args: argparse.Namespace) -> None:
     check_benchmarks(args)
 
     if args.lsizes is None:
-        args.lsizes = [50]
+        args.lsizes = [0.005, 0.01, 0.05, 0.1, 0.25, 0.5]
 
     args.random_states = list(range(args.n_states))
 
@@ -152,7 +154,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--n_states", type=int, help="Number of random states to average"
     )
-    parser.add_argument("--lsizes", nargs="*", type=int, help="Labelled sizes to test")
+    parser.add_argument(
+        "--lsizes",
+        nargs="*",
+        type=float,
+        help="Labelled sizes (int) or ratio (float) to test",
+    )
     parser.add_argument(
         "--log_root", type=str, help="Folder to store logs, if logging is on"
     )
@@ -174,10 +181,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     check_input(args)
 
-    session_results_root = os.path.join(
-        args.results_root, datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")
-    )
-    os.mkdir(session_results_root)
     for model in args.model:
         config = args.configs[model]
         runner = TestRunner(
@@ -190,6 +193,17 @@ if __name__ == "__main__":
             args.log_root,
         )
         runner.run(args.benchmarks)
-        pd.DataFrame(runner.stats_).to_csv(
-            os.path.join(session_results_root, f"{model}.csv"), sep=" "
-        )
+
+        model_root = os.path.join(args.results_root, model)
+        if not os.path.exists(model_root):
+            os.mkdir(model_root)
+        filename = datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")
+
+        for benchmark in args.benchmarks:
+            benchmark_root = os.path.join(model_root, benchmark)
+            if not os.path.exists(benchmark_root):
+                os.mkdir(benchmark_root)
+            results_path = os.path.join(benchmark_root, filename)
+            pd.DataFrame(runner.stats_[benchmark]).to_csv(
+                f"{results_path}.csv", sep=" ", index=False
+            )

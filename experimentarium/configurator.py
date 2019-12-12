@@ -90,7 +90,7 @@ class TestRunner(object):
         self.data_root = data_root
         self.random_states = random_states
         self.lsizes = lsizes
-        self.stats_ = []
+        self.stats_ = defaultdict(list)
         self.__stats = {}
 
         self.verbose = verbose
@@ -170,8 +170,10 @@ class TestRunner(object):
             is_random_state_kw = True
 
         for lsize in make_iter(lsizes, verbose, desc="Sizes"):
-            self.__stats["lsize"] = lsize
             scores = defaultdict(list)
+            ratio_ = round(lsize if lsize < 1 else lsize / len(y), 5)
+            lsize_ = int(lsize if lsize > 1 else lsize * len(y))
+            self.__stats["lsize"] = lsize_
             for random_state in make_iter(
                 random_states, verbose, desc="\tRandom states"
             ):
@@ -184,8 +186,6 @@ class TestRunner(object):
                     x, y, train_size=lsize, stratify=y, random_state=random_state
                 )
 
-                self.__stats["usize"] = len(x_test)
-
                 if is_ssl:
                     model.fit(x_train, y_train, x_test)
                 else:
@@ -194,13 +194,15 @@ class TestRunner(object):
                 scores["accuracy"].append(accuracy_score(preds, y_test))
                 scores["f1"].append(f1_score(preds, y_test))
 
+            self.__stats["usize"] = len(x_test)
             self.__stats["accuracy"] = np.mean(scores["accuracy"]).round(5)
             self.__stats["f1"] = np.mean(scores["f1"]).round(5)
             self.__stats["is_ssl"] = is_ssl
-            self.stats_.append(self.__stats.copy())
+
+            self.stats_[self.__stats["benchmark"]].append(self.__stats.copy())
 
             logger.info(
-                f"Labeled size = {lsize} (ratio {lsize / len(y_test):.3f}). Metrics: "
+                f"Labeled size = {lsize_} (ratio {ratio_}). Metrics: "
                 "accuracy = {:.5f}., f1 = {:.5f}.".format(
                     self.__stats["accuracy"], self.__stats["f1"]
                 )

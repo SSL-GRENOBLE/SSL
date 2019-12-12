@@ -23,4 +23,3 @@ class RFTree:
 
     def get_classes(self):
         return self.clf.classes_
-
