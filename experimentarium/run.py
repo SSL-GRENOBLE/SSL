@@ -71,33 +71,44 @@ def check_model(args) -> None:
 
 
 def check_benchmarks(args) -> None:
-    with open(absolutize("./data_react/dataset2dir.json")) as f:
-        dataset2dir = json.load(f)
+    with open(absolutize("./data_react/dataconfig.json")) as f:
+        datacfg = json.load(f)
 
-    unknown = []
+    data2dir = datacfg["dataset2dir"]
+    tag2data = datacfg["tag2data"]
+
     if args.benchmarks[0] == "all":
-        args.benchmarks = list(dataset2dir)
+        args.benchmarks = list(data2dir)
     else:
         for benchmark in args.benchmarks:
-            if benchmark not in dataset2dir:
-                raise ValueError(f"Dataset is not supported: {benchmark}.")
+            if benchmark not in data2dir and benchmark not in tag2data:
+                raise ValueError("Dataset or tag is not supported: {benchmark}.")
 
-    unknown = []
+    benchmarks = []
+    for benchmark in args.benchmarks:
+        if benchmark in tag2data:
+            benchmarks.extend(tag2data[benchmark])
+        else:
+            benchmarks.append(benchmark)
+    args.benchmarks = list(set(benchmarks))
+
+    print("Benchmarks parsed: ", args.benchmarks)
+    unloaded = []
     web_loader = WebDataDownloader(args.data_root)
     for benchmark in args.benchmarks:
-        folder = dataset2dir[benchmark]["folder"]
+        folder = data2dir[benchmark]
         path = os.path.join(args.data_root, folder)
         if not os.path.exists(path):
-            unknown.append(folder)
+            unloaded.append(folder)
         else:
             for url in web_loader.dir2url[folder]["urls"]:
                 _, filename = os.path.split(url)
                 if not os.path.exists(os.path.join(path, filename)):
-                    unknown.append(folder)
+                    unloaded.append(folder)
 
-    if unknown:
+    if unloaded:
         not_found = []
-        for benchmark in unknown:
+        for benchmark in unloaded:
             if not web_loader.download(benchmark):
                 not_found.append(benchmark)
         if not_found:
