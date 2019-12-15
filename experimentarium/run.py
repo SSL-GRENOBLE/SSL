@@ -6,11 +6,11 @@ import json
 import os
 import pandas as pd
 import warnings
-import data_generators
 
-from collections import defaultdict
 from configurator import MasterConfiguration, TestRunner
 from data_react.webloader import WebDataDownloader
+from data_generator.generator import DataGenerator
+
 
 warnings.filterwarnings("ignore")
 
@@ -94,17 +94,13 @@ def parse_benchmarks(args, datasets, tag2data):
     print("Benchmarks parsed: ", benchmarks)
     return benchmarks
 
-# TODO:
-# 1. Порефакторить код в run.py
-# 2. Разобраться с DataReader - как можно генерить функции
 
-
-def load_benchmarks(benchmarks, datasets):
-    unloaded = []]
-    web_loader = WebDataDownloader(args.data_root)
-    for benchmark in args.benchmarks:
+def load_benchmarks(benchmarks, datasets, data_root):
+    unloaded = []
+    web_loader = WebDataDownloader(data_root)
+    for benchmark in benchmarks:
         folder = datasets[benchmark]["folder"]
-        path = os.path.join(args.data_root, folder)
+        path = os.path.join(data_root, folder)
         if not os.path.exists(path):
             unloaded.append(folder)
         else:
@@ -127,12 +123,28 @@ def load_benchmarks(benchmarks, datasets):
             )
 
 
-def generate_benchmarks(benchmarks, datasets):
-    for benchmark in unloaded["synthetic"]:
-        gen_type = datasets[benchmark]["gen_type"]
-        func = getattr(data_generators, f"generate_{gen_type}")
-        params = datasets[benchmark]["params"]
-        func(params["type"], params["values"])
+def generate_benchmarks(benchmarks, datasets, data_root):
+    ungenerated = []
+    generator = DataGenerator(data_root)
+    for benchmark in benchmarks:
+        folder = datasets[benchmark]["folder"]
+        path = os.path.join(data_root, folder)
+        if not os.path.exists(path) or not os.listdir(path):
+            ungenerated.append(benchmark)
+
+    if ungenerated:
+        not_generated = []
+        for benchmark in ungenerated:
+            print("Generating data for", benchmark, "...")
+            if not generator.generate(datasets[benchmark]):
+                not_generated.append(benchmark)
+
+        if not_generated:
+            raise RuntimeError(
+                "These datasets cannot be generated: {}.".format(
+                    " ".join(not_generated)
+                )
+            )
 
 
 def check_benchmarks(args) -> None:
@@ -143,15 +155,16 @@ def check_benchmarks(args) -> None:
 
     args.benchmarks = parse_benchmarks(args, datasets, tag2data)
 
-    external = synthetic = []
+    external = []
+    synthetic = []
     for benchmark in args.benchmarks:
         if "gen_type" in datasets[benchmark]:
             synthetic.append(benchmark)
         else:
             external.append(benchmark)
 
-    load_benchmarks(external, datasets)
-    generate_benchmarks(synthetic, datasets)
+    load_benchmarks(external, datasets, args.data_root)
+    generate_benchmarks(synthetic, datasets, args.data_root)
 
 
 def check_input(args: argparse.Namespace) -> None:
@@ -222,7 +235,7 @@ if __name__ == "__main__":
         data_root=DEFAULT_DATA_ROOT,
         log_root=DEFAULT_LOG_ROOT,
         config_path=DEFAULT_CONFIG_PATH,
-        results_root=DEFAULT_RESULTS_ROOT,
+        results_root=DEFAULT_RESULTS_ROOT
     )
 
     args = parser.parse_args()

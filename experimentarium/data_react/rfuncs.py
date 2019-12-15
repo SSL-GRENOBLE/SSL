@@ -6,6 +6,7 @@ import pandas as pd
 import glob
 
 from sklearn.preprocessing import LabelEncoder
+from os.path import normpath, basename
 
 
 def pair_binarize_multi(x: np.ndarray, y: np.ndarray, label, label_other):
@@ -125,9 +126,17 @@ def read_kr_vs_kp(root: str):
 """
 
 
+def _read_synthetic_data(root: str):
+    path = os.path.join(root, basename(normpath(root)) + ".data")
+    df = pd.read_csv(path, sep=",", header=None)
+    x = df.values[:, :-1].astype(float)
+    y = df.values[:, -1].astype(int)
+    return x, y
+
+
 def read_causal_gaussian_1(root: str):
-    pass
+    return _read_synthetic_data(root)
 
 
 def read_anticausal_gaussian_1(root: str):
-    pass
+    return _read_synthetic_data(root)
