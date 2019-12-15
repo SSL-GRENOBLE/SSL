@@ -27,5 +27,34 @@
         "lowdense": [],
         "clustering": [],
         "manifold": []
+    },
+    "info": {
+        "banknotes": {
+            "n_classes": 2
+        },
+        "telescope": {
+            "n_classes": 2
+        },
+        "mnist_4_9": {
+            "n_classes": 2
+        },
+        "pendigits_4_9": {
+            "n_classes": 2
+        },
+        "fashion_mnist_4_9": {
+            "n_classes": 2
+        },
+        "breast_w": {
+            "n_classes": 2
+        },
+        "vehicles": {
+            "n_classes": 2
+        },
+        "balance_scale": {
+            "n_classes": 2
+        },
+        "kr_vs_kp": {
+            "n_classes": 2
+        }
     }
 }

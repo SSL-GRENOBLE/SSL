@@ -10,8 +10,6 @@ import warnings
 from configurator import MasterConfiguration, TestRunner
 from data_react.webloader import WebDataDownloader
 
-warnings.filterwarnings("ignore")
-
 
 DEFAULT_DATA_ROOT = "../../data/"
 DEFAULT_LOG_ROOT = "../../"
@@ -67,8 +65,7 @@ def check_model(args) -> None:
 
     for model, params in args.configs.items():
         if "model_cls" not in params and "baseline_cls" not in params:
-            raise ConfigError(
-                f"No testing classes are given for model: {model}.")
+            raise ConfigError(f"No testing classes are given for model: {model}.")
 
 
 def check_benchmarks(args) -> None:
@@ -83,18 +80,16 @@ def check_benchmarks(args) -> None:
     else:
         for benchmark in args.benchmarks:
             if benchmark not in data2dir and benchmark not in tag2data:
-                raise ValueError(
-                    "Dataset or tag is not supported: {benchmark}.")
+                raise ValueError(f"Dataset or tag is not supported: {benchmark}.")
 
-    benchmarks = []
+    benchmarks = set()
     for benchmark in args.benchmarks:
         if benchmark in tag2data:
-            benchmarks.extend(tag2data[benchmark])
+            benchmarks.union(tag2data[benchmark])
         else:
-            benchmarks.append(benchmark)
-    args.benchmarks = list(set(benchmarks))
+            benchmarks.add(benchmark)
+    args.benchmarks = list(benchmarks)
 
-    print("Benchmarks parsed: ", args.benchmarks)
     unloaded = []
     web_loader = WebDataDownloader(args.data_root)
     for benchmark in args.benchmarks:
@@ -133,6 +128,9 @@ def check_input(args: argparse.Namespace) -> None:
     if not os.path.exists(args.results_root):
         os.mkdir(args.results_root)
 
+    if args.ignore_warnings:
+        warnings.filterwarnings("ignore")
+
     check_config(args)
     check_model(args)
     check_benchmarks(args)
@@ -149,8 +147,7 @@ if __name__ == "__main__":
         "--model", type=str, nargs="+", help="Model(s) to train", required=True
     )
     parser.add_argument("--benchmarks", nargs="+", type=str, required=True)
-    parser.add_argument("--data_root", type=str,
-                        help="Path to folder with dataset.")
+    parser.add_argument("--data_root", type=str, help="Path to folder with dataset.")
     parser.add_argument(
         "--baseline",
         help="Whether to train baseline model",
@@ -180,6 +177,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--results_root", type=str, help="Folder to store testing result."
     )
+    parser.add_argument(
+        "--ignore_warnings",
+        type=distutils.util.strtobool,
+        help="Whether to supress warning or not",
+    )
 
     parser.set_defaults(
         n_states=10,
@@ -190,6 +192,7 @@ if __name__ == "__main__":
         log_root=DEFAULT_LOG_ROOT,
         config_path=DEFAULT_CONFIG_PATH,
         results_root=DEFAULT_RESULTS_ROOT,
+        ignore_warnings="True"
     )
 
     args = parser.parse_args()
