@@ -67,14 +67,15 @@ def check_model(args) -> None:
 
     for model, params in args.configs.items():
         if "model_cls" not in params and "baseline_cls" not in params:
-            raise ConfigError(f"No testing classes are given for model: {model}.")
+            raise ConfigError(
+                f"No testing classes are given for model: {model}.")
 
 
 def check_benchmarks(args) -> None:
     with open(absolutize("./data_react/dataconfig.json")) as f:
         datacfg = json.load(f)
 
-    data2dir = datacfg["dataset2dir"]
+    data2dir = datacfg["data2dir"]
     tag2data = datacfg["tag2data"]
 
     if args.benchmarks[0] == "all":
@@ -82,7 +83,8 @@ def check_benchmarks(args) -> None:
     else:
         for benchmark in args.benchmarks:
             if benchmark not in data2dir and benchmark not in tag2data:
-                raise ValueError("Dataset or tag is not supported: {benchmark}.")
+                raise ValueError(
+                    "Dataset or tag is not supported: {benchmark}.")
 
     benchmarks = []
     for benchmark in args.benchmarks:
@@ -147,7 +149,8 @@ if __name__ == "__main__":
         "--model", type=str, nargs="+", help="Model(s) to train", required=True
     )
     parser.add_argument("--benchmarks", nargs="+", type=str, required=True)
-    parser.add_argument("--data_root", type=str, help="Path to folder with dataset.")
+    parser.add_argument("--data_root", type=str,
+                        help="Path to folder with dataset.")
     parser.add_argument(
         "--baseline",
         help="Whether to train baseline model",
