@@ -6,6 +6,7 @@ import json
 import os
 import pandas as pd
 import warnings
+import shutil
 
 from configurator import MasterConfiguration, TestRunner
 from data_react.webloader import WebDataDownloader
@@ -83,7 +84,7 @@ def parse_benchmarks(args, datasets, tag2data):
     benchmarks = set()
     for benchmark in args.benchmarks:
         if benchmark in tag2data:
-            benchmarks.union(tag2data[benchmark])
+            benchmarks = benchmarks.union(tag2data[benchmark])
         else:
             benchmarks.add(benchmark)
 
@@ -120,12 +121,15 @@ def load_benchmarks(benchmarks, datasets, data_root):
             )
 
 
-def generate_benchmarks(benchmarks, datasets, data_root):
-    ungenerated = []
+def generate_benchmarks(benchmarks, datasets, data_root, clear_on_run):
     generator = DataGenerator(data_root)
+    ungenerated = []
     for benchmark in benchmarks:
         folder = datasets[benchmark]["folder"]
         path = os.path.join(data_root, folder)
+        if clear_on_run and os.path.exists(path):
+            shutil.rmtree(path)
+
         if not os.path.exists(path) or not os.listdir(path):
             ungenerated.append(benchmark)
 
@@ -161,7 +165,7 @@ def check_benchmarks(args) -> None:
             external.append(benchmark)
 
     load_benchmarks(external, datasets, args.data_root)
-    generate_benchmarks(synthetic, datasets, args.data_root)
+    generate_benchmarks(synthetic, datasets, args.data_root, args.debug)
 
 
 def check_input(args: argparse.Namespace) -> None:
@@ -232,6 +236,9 @@ if __name__ == "__main__":
         help="Whether to supress warning or not",
     )
 
+    parser.add_argument("--debug", type=distutils.util.strtobool,
+                        help="Whether to run the debug version of the program")
+
     parser.set_defaults(
         n_states=10,
         log="True",
@@ -240,7 +247,9 @@ if __name__ == "__main__":
         data_root=DEFAULT_DATA_ROOT,
         log_root=DEFAULT_LOG_ROOT,
         config_path=DEFAULT_CONFIG_PATH,
-        results_root=DEFAULT_RESULTS_ROOT
+        results_root=DEFAULT_RESULTS_ROOT,
+        ignore_warnings="True",
+        debug="True"
     )
 
     args = parser.parse_args()

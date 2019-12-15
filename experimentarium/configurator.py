@@ -103,7 +103,8 @@ class TestRunner(object):
         self.logger = setup_logger(verbose, log, log_root)
 
         with open(
-            os.path.join(os.path.dirname(__file__), "data_react/dataconfig.json")
+            os.path.join(os.path.dirname(__file__),
+                         "data_react/dataconfig.json")
         ) as f:
             self.datacfg = json.load(f)
 
@@ -111,7 +112,8 @@ class TestRunner(object):
         self.logger.info(f"Model: {self.configuration.model_cls}.")
         self.logger.info(f"Baseline: {self.configuration.baseline_cls}.")
         self.logger.info(f"Model params: {self.configuration.model_inits}.")
-        self.logger.info(f"Baseline params: {self.configuration.baseline_inits}.")
+        self.logger.info(
+            f"Baseline params: {self.configuration.baseline_inits}.")
 
     def run(self, benchmarks: Union[str, List[str]]) -> None:
         """
@@ -130,7 +132,7 @@ class TestRunner(object):
     def _test(self, benchmark: str) -> None:
         x, y = self.__reader.read(benchmark)
         try:
-            n_classes = self.datacfg["info"][benchmark]["n_classes"]
+            n_classes = self.datacfg[benchmark]["n_classes"]
         except KeyError:
             n_classes = len(np.unique(y))
         lsizes = []
@@ -178,7 +180,8 @@ class TestRunner(object):
             "\n"
             + f"...... Testing {'semisupervised' if is_ssl else 'supervised'} model:"
         )
-        logger.info(f"...... with configuration: {config.keywords or 'default'}.")
+        logger.info(
+            f"...... with configuration: {config.keywords or 'default'}.")
 
         if isinstance(random_states, int):
             random_states = [random_states]

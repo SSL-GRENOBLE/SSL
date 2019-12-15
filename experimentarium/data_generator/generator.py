@@ -17,7 +17,6 @@ class DataGenerator(object):
             os.makedirs(path)
         filename = os.path.join(path, basename(normpath(path)) + ".data")
         f = open(filename, "w")
-        print(zip(x, y))
         for x_, y_ in zip(x, y):
             f.write(','.join(map(str, x_)) + ',' + str(y_) + '\n')
         f.close()

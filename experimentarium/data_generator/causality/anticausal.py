@@ -1,5 +1,5 @@
 def _generate_sign(args):
-    print("generate_sign anticausal is called", args)
+    # TODO
     x = [[1], [2]]
     y = [1]
     return x, y, True
