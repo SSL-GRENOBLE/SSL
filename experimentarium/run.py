@@ -6,7 +6,9 @@ import json
 import os
 import pandas as pd
 import warnings
+import data_generators
 
+from collections import defaultdict
 from configurator import MasterConfiguration, TestRunner
 from data_react.webloader import WebDataDownloader
 
@@ -67,22 +69,19 @@ def check_model(args) -> None:
 
     for model, params in args.configs.items():
         if "model_cls" not in params and "baseline_cls" not in params:
-            raise ConfigError(f"No testing classes are given for model: {model}.")
+            raise ConfigError(
+                f"No testing classes are given for model: {model}.")
 
 
-def check_benchmarks(args) -> None:
-    with open(absolutize("./data_react/dataconfig.json")) as f:
-        datacfg = json.load(f)
-
-    data2dir = datacfg["dataset2dir"]
-    tag2data = datacfg["tag2data"]
-
+def parse_benchmarks(args, datasets, tag2data):
+    benchmarks = datasets.keys()
     if args.benchmarks[0] == "all":
-        args.benchmarks = list(data2dir)
+        args.benchmarks = list(benchmarks)
     else:
         for benchmark in args.benchmarks:
-            if benchmark not in data2dir and benchmark not in tag2data:
-                raise ValueError("Dataset or tag is not supported: {benchmark}.")
+            if benchmark not in benchmarks and benchmark not in tag2data:
+                raise ValueError(
+                    "Dataset or tag is not supported: {benchmark}.")
 
     benchmarks = []
     for benchmark in args.benchmarks:
@@ -90,13 +89,21 @@ def check_benchmarks(args) -> None:
             benchmarks.extend(tag2data[benchmark])
         else:
             benchmarks.append(benchmark)
-    args.benchmarks = list(set(benchmarks))
 
-    print("Benchmarks parsed: ", args.benchmarks)
-    unloaded = []
+    benchmarks = list(set(benchmarks))
+    print("Benchmarks parsed: ", benchmarks)
+    return benchmarks
+
+# TODO:
+# 1. Порефакторить код в run.py
+# 2. Разобраться с DataReader - как можно генерить функции
+
+
+def load_benchmarks(benchmarks, datasets):
+    unloaded = []]
     web_loader = WebDataDownloader(args.data_root)
     for benchmark in args.benchmarks:
-        folder = data2dir[benchmark]
+        folder = datasets[benchmark]["folder"]
         path = os.path.join(args.data_root, folder)
         if not os.path.exists(path):
             unloaded.append(folder)
@@ -111,12 +118,40 @@ def check_benchmarks(args) -> None:
         for benchmark in unloaded:
             if not web_loader.download(benchmark):
                 not_found.append(benchmark)
+
         if not_found:
             raise FileNotFoundError(
                 "These datasets not found or could not be downloaded: {}.".format(
                     " ".join(not_found)
                 )
             )
+
+
+def generate_benchmarks(benchmarks, datasets):
+    for benchmark in unloaded["synthetic"]:
+        gen_type = datasets[benchmark]["gen_type"]
+        func = getattr(data_generators, f"generate_{gen_type}")
+        params = datasets[benchmark]["params"]
+        func(params["type"], params["values"])
+
+
+def check_benchmarks(args) -> None:
+    with open(absolutize("./data_react/dataconfig.json")) as f:
+        datacfg = json.load(f)
+    datasets = datacfg["datasets"]
+    tag2data = datacfg["tag2data"]
+
+    args.benchmarks = parse_benchmarks(args, datasets, tag2data)
+
+    external = synthetic = []
+    for benchmark in args.benchmarks:
+        if "gen_type" in datasets[benchmark]:
+            synthetic.append(benchmark)
+        else:
+            external.append(benchmark)
+
+    load_benchmarks(external, datasets)
+    generate_benchmarks(synthetic, datasets)
 
 
 def check_input(args: argparse.Namespace) -> None:
@@ -147,7 +182,8 @@ if __name__ == "__main__":
         "--model", type=str, nargs="+", help="Model(s) to train", required=True
     )
     parser.add_argument("--benchmarks", nargs="+", type=str, required=True)
-    parser.add_argument("--data_root", type=str, help="Path to folder with dataset.")
+    parser.add_argument("--data_root", type=str,
+                        help="Path to folder with dataset.")
     parser.add_argument(
         "--baseline",
         help="Whether to train baseline model",

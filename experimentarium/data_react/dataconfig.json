@@ -1,14 +1,56 @@
 {
-    "data2dir": {
-        "banknotes": "banknotes",
-        "telescope": "telescope",
-        "mnist_4_9": "mnist",
-        "pendigits_4_9": "pendigits",
-        "fashion_mnist_4_9": "fashion_mnist",
-        "breast_w": "breast_w",
-        "vehicles": "vehicle",
-        "balance_scale": "balance_scale",
-        "kr_vs_kp": "kr_vs_kp"
+    "datasets": {
+        "banknotes": {
+            "folder": "banknotes"
+        },
+        "telescope": {
+            "folder": "telescope"
+        },
+        "mnist_4_9": {
+            "folder": "mnist"
+        },
+        "pendigits_4_9": {
+            "folder": "pendigits"
+        },
+        "fashion_mnist_4_9": {
+            "folder": "fashion_mnist"
+        },
+        "breast_w": {
+            "folder": "breast_w"
+        },
+        "vehicles": {
+            "folder": "vehicle"
+        },
+        "balance_scale": {
+            "folder": "balance_scale"
+        },
+        "kr_vs_kp": {
+            "folder": "kr_vs_kp"
+        },
+        "causal_gaussian_1": {
+            "folder": "synthetic/causality/causal_gaussian_1",
+            "gen_type": "causal",
+            "params": {
+                "type": "gaussian",
+                "values": [
+                    1,
+                    2,
+                    3,
+                    5
+                ]
+            }
+        },
+        "anticausal_gaussian_1": {
+            "folder": "synthetic/causality/anticausal_gaussian_1",
+            "gen_type": "anticausal",
+            "params": {
+                "type": "sign",
+                "values": [
+                    1,
+                    2
+                ]
+            }
+        }
     },
     "tag2data": {
         "general": [
@@ -22,7 +64,9 @@
             "breast_w",
             "vehicles",
             "balance_scale",
-            "kr_vs_kp"
+            "kr_vs_kp",
+            "causal_gaussian_1",
+            "anticausal_gaussian_1"
         ],
         "lowdense": [],
         "clustering": [],

@@ -119,3 +119,15 @@ def read_kr_vs_kp(root: str):
     x = df.values[:, :-1]
     y = df.values[:, -1]
     return x, y
+
+
+""" Synthetic data readers
+"""
+
+
+def read_causal_gaussian_1(root: str):
+    pass
+
+
+def read_anticausal_gaussian_1(root: str):
+    pass
