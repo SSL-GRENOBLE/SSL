@@ -20,9 +20,7 @@ def probs_to_margin(probs: np.ndarray, margin_mode: str = "soft") -> np.ndarray:
         return np.abs(probs.mean(axis=0))
     elif margin_mode == "soft":
         if probs.shape[-1] != 2:
-            warnings.warn(
-                "Cannot perform soft labelling. Recalculating in hard mode."
-            )
+            warnings.warn("Cannot perform soft labelling. Recalculating in hard mode.")
             return probs_to_margin(probs, "hard")
         return np.abs(np.subtract(*np.mean(probs, axis=0).T))
     else:

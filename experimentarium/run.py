@@ -192,7 +192,7 @@ if __name__ == "__main__":
         log_root=DEFAULT_LOG_ROOT,
         config_path=DEFAULT_CONFIG_PATH,
         results_root=DEFAULT_RESULTS_ROOT,
-        ignore_warnings="True"
+        ignore_warnings="True",
     )
 
     args = parser.parse_args()

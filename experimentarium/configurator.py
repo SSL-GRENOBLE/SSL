@@ -129,7 +129,10 @@ class TestRunner(object):
 
     def _test(self, benchmark: str) -> None:
         x, y = self.__reader.read(benchmark)
-        n_classes = self.datacfg["info"][benchmark]["n_classes"]
+        try:
+            n_classes = self.datacfg["info"][benchmark]["n_classes"]
+        except KeyError:
+            n_classes = len(np.unique(y))
         lsizes = []
         for lsize in self.lsizes:
             if isinstance(lsize, float):
