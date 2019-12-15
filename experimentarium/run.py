@@ -85,9 +85,9 @@ def parse_benchmarks(args, datasets, tag2data):
         if benchmark in tag2data:
             benchmarks.union(tag2data[benchmark])
         else:
-            benchmarks.append(benchmark)
+            benchmarks.add(benchmark)
 
-    benchmarks = list(set(benchmarks))
+    benchmarks = list(benchmarks)
     print("Benchmarks parsed: ", benchmarks)
     return benchmarks
 
@@ -240,12 +240,7 @@ if __name__ == "__main__":
         data_root=DEFAULT_DATA_ROOT,
         log_root=DEFAULT_LOG_ROOT,
         config_path=DEFAULT_CONFIG_PATH,
-        << << << < HEAD
         results_root=DEFAULT_RESULTS_ROOT
-        == == == =
-        results_root=DEFAULT_RESULTS_ROOT,
-        ignore_warnings="True",
-        >>>>>> > master
     )
 
     args = parser.parse_args()
