@@ -12,9 +12,6 @@ from data_react.webloader import WebDataDownloader
 from data_generator.generator import DataGenerator
 
 
-warnings.filterwarnings("ignore")
-
-
 DEFAULT_DATA_ROOT = "../../data/"
 DEFAULT_LOG_ROOT = "../../"
 DEFAULT_RESULTS_ROOT = "../../results"
@@ -83,10 +80,10 @@ def parse_benchmarks(args, datasets, tag2data):
                 raise ValueError(
                     "Dataset or tag is not supported: {benchmark}.")
 
-    benchmarks = []
+    benchmarks = set()
     for benchmark in args.benchmarks:
         if benchmark in tag2data:
-            benchmarks.extend(tag2data[benchmark])
+            benchmarks.union(tag2data[benchmark])
         else:
             benchmarks.append(benchmark)
 
@@ -179,6 +176,9 @@ def check_input(args: argparse.Namespace) -> None:
     if not os.path.exists(args.results_root):
         os.mkdir(args.results_root)
 
+    if args.ignore_warnings:
+        warnings.filterwarnings("ignore")
+
     check_config(args)
     check_model(args)
     check_benchmarks(args)
@@ -226,6 +226,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--results_root", type=str, help="Folder to store testing result."
     )
+    parser.add_argument(
+        "--ignore_warnings",
+        type=distutils.util.strtobool,
+        help="Whether to supress warning or not",
+    )
 
     parser.set_defaults(
         n_states=10,
@@ -235,7 +240,12 @@ if __name__ == "__main__":
         data_root=DEFAULT_DATA_ROOT,
         log_root=DEFAULT_LOG_ROOT,
         config_path=DEFAULT_CONFIG_PATH,
+        << << << < HEAD
         results_root=DEFAULT_RESULTS_ROOT
+        == == == =
+        results_root=DEFAULT_RESULTS_ROOT,
+        ignore_warnings="True",
+        >>>>>> > master
     )
 
     args = parser.parse_args()

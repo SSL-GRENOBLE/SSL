@@ -1,6 +1,7 @@
 """Module with Self-Learning Algorithm."""
 
 from typing import Optional
+import warnings
 
 import numpy as np
 from sklearn.ensemble import BaseEnsemble
@@ -18,6 +19,9 @@ def probs_to_margin(probs: np.ndarray, margin_mode: str = "soft") -> np.ndarray:
         probs[probs == 0] = -1
         return np.abs(probs.mean(axis=0))
     elif margin_mode == "soft":
+        if probs.shape[-1] != 2:
+            warnings.warn("Cannot perform soft labelling. Recalculating in hard mode.")
+            return probs_to_margin(probs, "hard")
         return np.abs(np.subtract(*np.mean(probs, axis=0).T))
     else:
         raise ValueError
@@ -129,7 +133,9 @@ class BinarySLA(object):
 
     def _fit(self, train_set: SSLTrainSet) -> None:
         margins = probs_to_margin(
-            [e.predict_proba(train_set.udata) for e in self.model.estimators_],
+            np.array(
+                [e.predict_proba(train_set.udata) for e in self.model.estimators_]
+            ),
             self.margin_mode,
         )
         if self.adaptive:

@@ -1,6 +1,9 @@
+import json
 import logging
 import inspect
+import os
 import sys
+import warnings
 
 from collections import defaultdict
 from functools import partial
@@ -91,11 +94,18 @@ class TestRunner(object):
         self.random_states = random_states
         self.lsizes = lsizes
         self.stats_ = defaultdict(list)
+
         self.__stats = {}
+        self.__reader = DataReader(data_root)
 
         self.verbose = verbose
         self.log = log
         self.logger = setup_logger(verbose, log, log_root)
+
+        with open(
+            os.path.join(os.path.dirname(__file__), "data_react/dataconfig.json")
+        ) as f:
+            self.datacfg = json.load(f)
 
         self.logger.info("-" * 5 + " Configuration info " + "-" * 5)
         self.logger.info(f"Model: {self.configuration.model_cls}.")
@@ -111,15 +121,30 @@ class TestRunner(object):
         """
         if isinstance(benchmarks, str):
             benchmarks = [benchmarks]
-        reader = DataReader(self.data_root)
         self.logger.info("\n" + "-" * 5 + " Testing " + "-" * 5)
         for benchmark in make_iter(benchmarks, self.verbose, "Benchmarks"):
             self.logger.info("\n" + f"... Testing benchmark {benchmark}.")
             self.__stats["benchmark"] = benchmark
-            x, y = reader.read(benchmark)
-            self._test(x, y)
+            self._test(benchmark)
 
-    def _test(self, x, y) -> None:
+    def _test(self, benchmark: str) -> None:
+        x, y = self.__reader.read(benchmark)
+        try:
+            n_classes = self.datacfg["info"][benchmark]["n_classes"]
+        except KeyError:
+            n_classes = len(np.unique(y))
+        lsizes = []
+        for lsize in self.lsizes:
+            if isinstance(lsize, float):
+                lsize = int(lsize * len(y))
+            if lsize < n_classes:
+                lsize = n_classes
+                warnings.warn(
+                    "Given inappropriate number of labelled samples, "
+                    f"changing it for {lsize}."
+                )
+            lsizes.append(lsize)
+
         for mode in ["model", "baseline"]:
             if getattr(self.configuration, f"{mode}_cls") is not None:
                 for model_config in getattr(self.configuration, f"{mode}_configs"):
@@ -128,7 +153,7 @@ class TestRunner(object):
                         x,
                         y,
                         self.random_states,
-                        self.lsizes,
+                        lsizes,
                         self.logger,
                         mode == "model",
                     )
@@ -171,9 +196,9 @@ class TestRunner(object):
 
         for lsize in make_iter(lsizes, verbose, desc="Sizes"):
             scores = defaultdict(list)
-            ratio_ = round(lsize if lsize < 1 else lsize / len(y), 5)
-            lsize_ = int(lsize if lsize > 1 else lsize * len(y))
-            self.__stats["lsize"] = lsize_
+            ratio_ = round(lsize / len(y), 5)
+
+            self.__stats["lsize"] = lsize
             for random_state in make_iter(
                 random_states, verbose, desc="\tRandom states"
             ):
@@ -202,7 +227,7 @@ class TestRunner(object):
             self.stats_[self.__stats["benchmark"]].append(self.__stats.copy())
 
             logger.info(
-                f"Labeled size = {lsize_} (ratio {ratio_}). Metrics: "
+                f"Labeled size = {lsize} (ratio {ratio_}). Metrics: "
                 "accuracy = {:.5f}., f1 = {:.5f}.".format(
                     self.__stats["accuracy"], self.__stats["f1"]
                 )
