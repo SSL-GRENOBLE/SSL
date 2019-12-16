@@ -39,7 +39,7 @@
         "anticausal_gaussian_1": {
             "folder": "synthetic/causality/acg1",
             "n_classes": 2,
-            "gen_type": "causal",
+            "gen_type": "anticausal",
             "params": {
                 "type": "gaussian",
                 "args": {
