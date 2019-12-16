@@ -16,32 +16,33 @@ DEFAULT_RESULTS_ROOT = os.path.normpath(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("ResultMerger")
     parser.add_argument("--results_root", type=str, help="Folder with produced results")
-    parser.add_argument("--model", type=str, nargs="+", help="Model results to merge")
+    parser.add_argument("--benchmarks", type=str, nargs="+", help="Benchmarks to merge")
+    parser.add_argument("--models", type=str, nargs="+", help="Models to merge")
 
-    parser.set_defaults(results_root=DEFAULT_RESULTS_ROOT, model=["all"])
+    parser.set_defaults(
+        results_root=DEFAULT_RESULTS_ROOT, models=["all"], benchmarks=["all"]
+    )
 
     args = parser.parse_args()
 
-    pattern = "*"
-    if args.model[0] != "all":
-        pattern += f"[{'|'.join(args.model)}]*"
+    benchmark_pattern = "*[!merged]"
+    if args.benchmarks[0] != "all":
+        benchmark_pattern += f"[{'|'.join(args.benchmarks)}]*"
 
-    out_df = None
-    for model_root in Path(args.results_root).glob(pattern):
-        for bencmark_root in Path(model_root).glob("*"):
-            csv_file = list(Path(bencmark_root).glob("*.csv"))[-1]
-            df = pd.read_csv(csv_file, sep=" ", index_col=False)
-            if out_df is None:
-                out_df = df
-            else:
-                out_df = out_df.append(df, ignore_index=True)
+    models_pattern = "*"
+    if args.models[0] != "all":
+        models_pattern += f"[{'|'.join(args.models)}]*"
 
-    merge_root = os.path.join(
-        Path(args.results_root).resolve().parents[0], "merged_results"
-    )
+    merged_results = list()
+    for benchmark_root in Path(args.results_root).glob(benchmark_pattern):
+        for model_root in Path(benchmark_root).glob(models_pattern):
+            result_path = max(Path(model_root).glob("*.csv"), key=os.path.getctime)
+            merged_results.append(pd.read_csv(result_path, sep=" ", index_col=False))
+
+    merge_root = os.path.join(args.results_root, "merged")
     if not os.path.exists(merge_root):
         os.mkdir(merge_root)
-    filename = os.path.join(
+    path = os.path.join(
         merge_root, f'{datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")}.csv'
     )
-    out_df.to_csv(filename, sep=" ", index=False)
+    pd.concat(merged_results).to_csv(path, sep=" ", index=False)
