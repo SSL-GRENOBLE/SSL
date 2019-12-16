@@ -1,14 +1,59 @@
 {
-    "data2dir": {
-        "banknotes": "banknotes",
-        "telescope": "telescope",
-        "mnist_4_9": "mnist",
-        "pendigits_4_9": "pendigits",
-        "fashion_mnist_4_9": "fashion_mnist",
-        "breast_w": "breast_w",
-        "vehicles": "vehicle",
-        "balance_scale": "balance_scale",
-        "kr_vs_kp": "kr_vs_kp"
+    "datasets": {
+        "banknotes": {
+            "folder": "banknotes",
+            "n_classes": 2
+        },
+        "telescope": {
+            "folder": "telescope",
+            "n_classes": 2
+        },
+        "mnist_4_9": {
+            "folder": "mnist",
+            "n_classes": 2
+        },
+        "pendigits_4_9": {
+            "folder": "pendigits",
+            "n_classes": 2
+        },
+        "fashion_mnist_4_9": {
+            "folder": "fashion_mnist",
+            "n_classes": 2
+        },
+        "breast_w": {
+            "folder": "breast_w",
+            "n_classes": 2
+        },
+        "vehicles": {
+            "folder": "vehicle",
+            "n_classes": 2
+        },
+        "balance_scale": {
+            "folder": "balance_scale",
+            "n_classes": 2
+        },
+        "kr_vs_kp": {
+            "folder": "kr_vs_kp",
+            "n_classes": 2
+        },
+        "anticausal_gaussian_1": {
+            "folder": "synthetic/causality/acg1",
+            "n_classes": 2,
+            "gen_type": "causal",
+            "params": {
+                "type": "gaussian",
+                "args": {
+                    "means": [
+                        1,
+                        2
+                    ],
+                    "variances": [
+                        3,
+                        4
+                    ]
+                }
+            }
+        }
     },
     "tag2data": {
         "general": [
@@ -22,39 +67,11 @@
             "breast_w",
             "vehicles",
             "balance_scale",
-            "kr_vs_kp"
+            "kr_vs_kp",
+            "anticausal_gaussian_1"
         ],
         "lowdense": [],
         "clustering": [],
         "manifold": []
-    },
-    "info": {
-        "banknotes": {
-            "n_classes": 2
-        },
-        "telescope": {
-            "n_classes": 2
-        },
-        "mnist_4_9": {
-            "n_classes": 2
-        },
-        "pendigits_4_9": {
-            "n_classes": 2
-        },
-        "fashion_mnist_4_9": {
-            "n_classes": 2
-        },
-        "breast_w": {
-            "n_classes": 2
-        },
-        "vehicles": {
-            "n_classes": 2
-        },
-        "balance_scale": {
-            "n_classes": 2
-        },
-        "kr_vs_kp": {
-            "n_classes": 2
-        }
     }
 }

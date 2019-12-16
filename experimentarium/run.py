@@ -6,9 +6,11 @@ import json
 import os
 import pandas as pd
 import warnings
+import shutil
 
 from configurator import MasterConfiguration, TestRunner
 from data_react.webloader import WebDataDownloader
+from data_generator.generator import DataGenerator
 
 
 DEFAULT_DATA_ROOT = "../../data/"
@@ -65,36 +67,38 @@ def check_model(args) -> None:
 
     for model, params in args.configs.items():
         if "model_cls" not in params and "baseline_cls" not in params:
-            raise ConfigError(f"No testing classes are given for model: {model}.")
+            raise ConfigError(
+                f"No testing classes are given for model: {model}.")
 
 
-def check_benchmarks(args) -> None:
-    with open(absolutize("./data_react/dataconfig.json")) as f:
-        datacfg = json.load(f)
-
-    data2dir = datacfg["data2dir"]
-    tag2data = datacfg["tag2data"]
-
+def parse_benchmarks(args, datasets, tag2data):
+    benchmarks = datasets.keys()
     if args.benchmarks[0] == "all":
-        args.benchmarks = list(data2dir)
+        args.benchmarks = list(benchmarks)
     else:
         for benchmark in args.benchmarks:
-            if benchmark not in data2dir and benchmark not in tag2data:
-                raise ValueError(f"Dataset or tag is not supported: {benchmark}.")
+            if benchmark not in benchmarks and benchmark not in tag2data:
+                raise ValueError(
+                    "Dataset or tag is not supported: {benchmark}.")
 
     benchmarks = set()
     for benchmark in args.benchmarks:
         if benchmark in tag2data:
-            benchmarks.union(tag2data[benchmark])
+            benchmarks = benchmarks.union(tag2data[benchmark])
         else:
             benchmarks.add(benchmark)
-    args.benchmarks = list(benchmarks)
 
+    benchmarks = list(benchmarks)
+    print("Benchmarks parsed: ", benchmarks)
+    return benchmarks
+
+
+def load_benchmarks(benchmarks, datasets, data_root):
     unloaded = []
-    web_loader = WebDataDownloader(args.data_root)
-    for benchmark in args.benchmarks:
-        folder = data2dir[benchmark]
-        path = os.path.join(args.data_root, folder)
+    web_loader = WebDataDownloader(data_root)
+    for benchmark in benchmarks:
+        folder = datasets[benchmark]["folder"]
+        path = os.path.join(data_root, folder)
         if not os.path.exists(path):
             unloaded.append(folder)
         else:
@@ -108,12 +112,60 @@ def check_benchmarks(args) -> None:
         for benchmark in unloaded:
             if not web_loader.download(benchmark):
                 not_found.append(benchmark)
+
         if not_found:
             raise FileNotFoundError(
                 "These datasets not found or could not be downloaded: {}.".format(
                     " ".join(not_found)
                 )
             )
+
+
+def generate_benchmarks(benchmarks, datasets, data_root, clear_on_run):
+    generator = DataGenerator(data_root)
+    ungenerated = []
+    for benchmark in benchmarks:
+        folder = datasets[benchmark]["folder"]
+        path = os.path.join(data_root, folder)
+        if clear_on_run and os.path.exists(path):
+            shutil.rmtree(path)
+
+        if not os.path.exists(path) or not os.listdir(path):
+            ungenerated.append(benchmark)
+
+    if ungenerated:
+        not_generated = []
+        for benchmark in ungenerated:
+            print("Generating data for", benchmark, "...")
+            if not generator.generate(datasets[benchmark]):
+                not_generated.append(benchmark)
+
+        if not_generated:
+            raise RuntimeError(
+                "These datasets cannot be generated: {}.".format(
+                    " ".join(not_generated)
+                )
+            )
+
+
+def check_benchmarks(args) -> None:
+    with open(absolutize("./data_react/dataconfig.json")) as f:
+        datacfg = json.load(f)
+    datasets = datacfg["datasets"]
+    tag2data = datacfg["tag2data"]
+
+    args.benchmarks = parse_benchmarks(args, datasets, tag2data)
+
+    external = []
+    synthetic = []
+    for benchmark in args.benchmarks:
+        if "gen_type" in datasets[benchmark]:
+            synthetic.append(benchmark)
+        else:
+            external.append(benchmark)
+
+    load_benchmarks(external, datasets, args.data_root)
+    generate_benchmarks(synthetic, datasets, args.data_root, args.debug)
 
 
 def check_input(args: argparse.Namespace) -> None:
@@ -147,7 +199,8 @@ if __name__ == "__main__":
         "--model", type=str, nargs="+", help="Model(s) to train", required=True
     )
     parser.add_argument("--benchmarks", nargs="+", type=str, required=True)
-    parser.add_argument("--data_root", type=str, help="Path to folder with dataset.")
+    parser.add_argument("--data_root", type=str,
+                        help="Path to folder with dataset.")
     parser.add_argument(
         "--baseline",
         help="Whether to train baseline model",
@@ -183,6 +236,9 @@ if __name__ == "__main__":
         help="Whether to supress warning or not",
     )
 
+    parser.add_argument("--debug", type=distutils.util.strtobool,
+                        help="Whether to run the debug version of the program")
+
     parser.set_defaults(
         n_states=10,
         log="True",
@@ -193,6 +249,7 @@ if __name__ == "__main__":
         config_path=DEFAULT_CONFIG_PATH,
         results_root=DEFAULT_RESULTS_ROOT,
         ignore_warnings="True",
+        debug="True"
     )
 
     args = parser.parse_args()
