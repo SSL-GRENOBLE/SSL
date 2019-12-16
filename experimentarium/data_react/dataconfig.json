@@ -40,9 +40,8 @@
             "folder": "synthetic/causality/acg1",
             "n_classes": 2,
             "gen_type": "anticausal",
-            "gen_func": "sign",
+            "gen_func": "gaussian",
             "params": {
-                "type": "gaussian",
                 "args": {
                     "means": [
                         1,
