@@ -2,7 +2,6 @@ import json
 import logging
 import inspect
 import os
-import sys
 import warnings
 
 from collections import defaultdict
@@ -77,6 +76,7 @@ class TestRunner(object):
         verbose: bool = True,
         log: bool = False,
         log_root: Optional[str] = None,
+        progress_bar: bool = False,
     ) -> None:
         """
             name: Model name.
@@ -88,6 +88,7 @@ class TestRunner(object):
                 If True, stores to log_root.
             log_root: Folder to store logs.
                 Stores log in `.ssl_test_logs` in `log_root`.
+            progress_bar: Whether to show progress bar while execution.
         """
         self.configuration = configuration
         self.data_root = data_root
@@ -99,12 +100,12 @@ class TestRunner(object):
         self.__reader = DataReader(data_root)
 
         self.verbose = verbose
+        self.progress_bar = progress_bar
         self.log = log
         self.logger = setup_logger(verbose, log, log_root)
 
         with open(
-            os.path.join(os.path.dirname(__file__),
-                         "data_react/dataconfig.json")
+            os.path.join(os.path.dirname(__file__), "data_react/dataconfig.json")
         ) as f:
             self.datacfg = json.load(f)
 
@@ -112,8 +113,7 @@ class TestRunner(object):
         self.logger.info(f"Model: {self.configuration.model_cls}.")
         self.logger.info(f"Baseline: {self.configuration.baseline_cls}.")
         self.logger.info(f"Model params: {self.configuration.model_inits}.")
-        self.logger.info(
-            f"Baseline params: {self.configuration.baseline_inits}.")
+        self.logger.info(f"Baseline params: {self.configuration.baseline_inits}.")
 
     def run(self, benchmarks: Union[str, List[str]]) -> None:
         """
@@ -124,7 +124,7 @@ class TestRunner(object):
         if isinstance(benchmarks, str):
             benchmarks = [benchmarks]
         self.logger.info("\n" + "-" * 5 + " Testing " + "-" * 5)
-        for benchmark in make_iter(benchmarks, self.verbose, "Benchmarks"):
+        for benchmark in make_iter(benchmarks, self.progress_bar, "Benchmarks"):
             self.logger.info("\n" + f"... Testing benchmark {benchmark}.")
             self.__stats["benchmark"] = benchmark
             self._test(benchmark)
@@ -180,30 +180,22 @@ class TestRunner(object):
             "\n"
             + f"...... Testing {'semisupervised' if is_ssl else 'supervised'} model:"
         )
-        logger.info(
-            f"...... with configuration: {config.keywords or 'default'}.")
+        logger.info(f"...... with configuration: {config.keywords or 'default'}.")
 
         if isinstance(random_states, int):
             random_states = [random_states]
-
-        verbose = False
-        if logger.hasHandlers():
-            for handler in logger.handlers:
-                if handler.stream == sys.stdout:
-                    verbose = True
-                    break
 
         is_random_state_kw = False
         if "random_state" in inspect.signature(config.func).parameters:
             is_random_state_kw = True
 
-        for lsize in make_iter(lsizes, verbose, desc="Sizes"):
+        for lsize in make_iter(lsizes, self.progress_bar, desc="Sizes"):
             scores = defaultdict(list)
             ratio_ = round(lsize / len(y), 5)
 
             self.__stats["lsize"] = lsize
             for random_state in make_iter(
-                random_states, verbose, desc="\tRandom states"
+                random_states, self.progress_bar, desc="\tRandom states"
             ):
                 if is_random_state_kw:
                     model = config(random_state=random_state)

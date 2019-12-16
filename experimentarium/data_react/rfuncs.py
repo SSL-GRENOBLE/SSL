@@ -6,7 +6,6 @@ import pandas as pd
 import glob
 
 from sklearn.preprocessing import LabelEncoder
-from os.path import normpath, basename
 
 
 def pair_binarize_multi(x: np.ndarray, y: np.ndarray, label, label_other):
@@ -117,17 +116,16 @@ def read_kr_vs_kp(root: str):
     path = os.path.join(root, "kr-vs-kp.data")
     df = pd.read_csv(path, sep=",", header=None)
     df = df.apply(LabelEncoder().fit_transform)
-    x = df.values[:, :-1]
-    y = df.values[:, -1]
+    x = df.values[:, :-1].astype(float)
+    y = df.values[:, -1].astype(int)
     return x, y
 
 
-""" Synthetic data readers
-"""
+""" Synthetic data readers """
 
 
 def _read_synthetic_data(root: str):
-    path = os.path.join(root, basename(normpath(root)) + ".data")
+    path = os.path.join(root, "data.txt")
     df = pd.read_csv(path, sep=",", header=None)
     x = df.values[:, :-1].astype(float)
     y = df.values[:, -1].astype(int)

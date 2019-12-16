@@ -47,21 +47,24 @@ class WebDataDownloader(object):
         with open(os.path.join(os.path.dirname(__file__), "dir2url.json")) as f:
             self.dir2url = json.load(f)
 
-    def download(self, name: str) -> bool:
-        if name not in self.dir2url:
-            raise ValueError(f"Unknown benchmark {name}.")
+    def download(self, *benchmarks) -> None:
+        for benchmark in benchmarks:
+            self.__download(benchmark)
+
+    def __download(self, benchmark: str):
         if not is_connected():
-            return False
+            raise RuntimeError("No internet connection.")
+        if benchmark not in self.dir2url:
+            raise ValueError(f"Unknown benchmark {benchmark}.")
         if not os.path.exists(self.root):
             os.mkdir(self.root)
 
-        benchmark = self.dir2url[name]
-        benchmark_root = os.path.join(self.root, name)
+        benchmark_root = os.path.join(self.root, benchmark)
         if not os.path.exists(benchmark_root):
             os.mkdir(benchmark_root)
 
         with cd(benchmark_root):
-            for url in benchmark["urls"]:
+            for url in self.dir2url[benchmark]["urls"]:
                 _, filename = os.path.split(url)
                 file_path = os.path.join(benchmark_root, filename)
 
@@ -71,4 +74,3 @@ class WebDataDownloader(object):
                     sys.stdout.write(f"Downloading file to {benchmark_root}.\n")
                     sys.stdout.flush()
                     curl(url)
-        return True
