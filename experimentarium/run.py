@@ -215,10 +215,15 @@ if __name__ == "__main__":
         type=distutils.util.strtobool,
         help="Whether to demonstrate progress bar",
     )
+    parser.add_argument(
+        "--merge_results",
+        type=distutils.util.strtobool,
+        help="Whether to merge results after each run",
+    )
 
     parser.set_defaults(
         n_states=10,
-        log="True",
+        log="False",
         verbose="True",
         baseline="True",
         data_root=DEFAULT_DATA_ROOT,
@@ -228,10 +233,14 @@ if __name__ == "__main__":
         ignore_warnings="True",
         debug="True",
         progress_bar="False",
+        merge_results="False",
     )
 
     args = parser.parse_args()
     check_input(args)
+
+    if args.merge_results:
+        merged_results = []
 
     for model in args.model:
         config = args.configs[model]
@@ -247,16 +256,27 @@ if __name__ == "__main__":
         )
         runner.run(args.benchmarks)
 
-        model_root = os.path.join(args.results_root, model)
-        if not os.path.exists(model_root):
-            os.mkdir(model_root)
-        filename = datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")
-
         for benchmark in args.benchmarks:
-            benchmark_root = os.path.join(model_root, benchmark)
-            if not os.path.exists(benchmark_root):
-                os.mkdir(benchmark_root)
-            results_path = os.path.join(benchmark_root, filename)
-            pd.DataFrame(runner.stats_[benchmark]).to_csv(
-                f"{results_path}.csv", sep=" ", index=False
-            )
+            benchmark_root = os.path.join(args.results_root, benchmark)
+            model_root = os.path.join(benchmark_root, model)
+            try:
+                os.makedirs(model_root)
+            except FileExistsError:
+                pass
+            filename = datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")
+            path = os.path.join(model_root, filename)
+            df = pd.DataFrame(runner.stats_[benchmark])
+            df["model"] = model
+            df.to_csv(f"{path}.csv", sep=" ", index=False)
+            if args.merge_results:
+                merged_results.append(df)
+
+    if args.merge_results:
+        merged_root = os.path.join(args.results_root, "merged")
+        try:
+            os.makedirs(merged_root)
+        except FileExistsError:
+            pass
+        filename = datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")
+        path = os.path.join(merged_root, f"{filename}.csv")
+        pd.concat(merged_results).to_csv(path, sep=" ", index=False)

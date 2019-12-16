@@ -79,7 +79,6 @@ class TestRunner(object):
         progress_bar: bool = False,
     ) -> None:
         """
-            name: Model name.
             configuration: Model configurations to be tested.
             random_states: Random states.
             lsizes: Labelled examples sizes.
@@ -137,8 +136,10 @@ class TestRunner(object):
             n_classes = len(np.unique(y))
         lsizes = []
         for lsize in self.lsizes:
-            if isinstance(lsize, float):
+            if not lsize.is_integer():
                 lsize = int(lsize * len(y))
+            else:
+                lsize = int(lsize)
             if lsize < n_classes:
                 lsize = n_classes
                 warnings.warn(
