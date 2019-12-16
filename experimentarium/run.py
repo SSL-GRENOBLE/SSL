@@ -8,9 +8,10 @@ import pandas as pd
 import warnings
 import shutil
 
+from typing import List
+
 from configurator import MasterConfiguration, TestRunner
-from data_react.webloader import WebDataDownloader
-from data_generator.generator import DataGenerator
+from data_react import DataGenerator, WebDataDownloader
 
 
 DEFAULT_DATA_ROOT = "../../data/"
@@ -34,14 +35,14 @@ def absolutize(path: str) -> str:
     return path
 
 
-def extract_configs(args):
+def extract_configs(args: argparse.Namespace):
     spec = importlib.util.spec_from_file_location("config", args.config_path)
     cmodule = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(cmodule)
     args.configs = cmodule.configs
 
 
-def check_config(args) -> None:
+def check_config(args: argparse.Namespace) -> None:
     if not os.path.exists(args.config_path):
         raise FileNotFoundError(f"No config found at {args.config_path}.")
     try:
@@ -50,7 +51,7 @@ def check_config(args) -> None:
         raise AttributeError(f"No proper configuration in {args.config_path}.")
 
 
-def check_model(args) -> None:
+def check_model(args: argparse.Namespace) -> None:
     if args.model[0] == "all":
         args.model = list(args.configs)
     else:
@@ -67,38 +68,32 @@ def check_model(args) -> None:
 
     for model, params in args.configs.items():
         if "model_cls" not in params and "baseline_cls" not in params:
-            raise ConfigError(
-                f"No testing classes are given for model: {model}.")
+            raise ConfigError(f"No testing classes are given for model: {model}.")
 
 
-def parse_benchmarks(args, datasets, tag2data):
-    benchmarks = datasets.keys()
+def parse_benchmarks(args: argparse.Namespace) -> None:
     if args.benchmarks[0] == "all":
-        args.benchmarks = list(benchmarks)
+        args.benchmarks = list(args.benchmarks)
     else:
         for benchmark in args.benchmarks:
-            if benchmark not in benchmarks and benchmark not in tag2data:
-                raise ValueError(
-                    "Dataset or tag is not supported: {benchmark}.")
+            if benchmark not in args.benchmarks and benchmark not in args.tag2data:
+                raise ValueError(f"Dataset or tag is not supported: {benchmark}.")
 
-    benchmarks = set()
-    for benchmark in args.benchmarks:
-        if benchmark in tag2data:
-            benchmarks = benchmarks.union(tag2data[benchmark])
-        else:
-            benchmarks.add(benchmark)
-
-    benchmarks = list(benchmarks)
-    print("Benchmarks parsed: ", benchmarks)
-    return benchmarks
+        benchmarks = set()
+        for benchmark in args.benchmarks:
+            if benchmark in args.tag2data:
+                benchmarks = benchmarks.union(args.tag2data[benchmark])
+            else:
+                benchmarks.add(benchmark)
+        args.benchmarks = list(benchmarks)
 
 
-def load_benchmarks(benchmarks, datasets, data_root):
+def load_benchmarks(args: argparse.Namespace, benchmarks: List) -> None:
     unloaded = []
-    web_loader = WebDataDownloader(data_root)
+    web_loader = WebDataDownloader(args.data_root)
     for benchmark in benchmarks:
-        folder = datasets[benchmark]["folder"]
-        path = os.path.join(data_root, folder)
+        folder = args.datasets[benchmark]["folder"]
+        path = os.path.join(args.data_root, folder)
         if not os.path.exists(path):
             unloaded.append(folder)
         else:
@@ -106,66 +101,42 @@ def load_benchmarks(benchmarks, datasets, data_root):
                 _, filename = os.path.split(url)
                 if not os.path.exists(os.path.join(path, filename)):
                     unloaded.append(folder)
-
-    if unloaded:
-        not_found = []
-        for benchmark in unloaded:
-            if not web_loader.download(benchmark):
-                not_found.append(benchmark)
-
-        if not_found:
-            raise FileNotFoundError(
-                "These datasets not found or could not be downloaded: {}.".format(
-                    " ".join(not_found)
-                )
-            )
+    web_loader.download(*unloaded)
 
 
-def generate_benchmarks(benchmarks, datasets, data_root, clear_on_run):
-    generator = DataGenerator(data_root)
+def generate_benchmarks(args: argparse.Namespace, benchmarks: List) -> None:
     ungenerated = []
     for benchmark in benchmarks:
-        folder = datasets[benchmark]["folder"]
-        path = os.path.join(data_root, folder)
-        if clear_on_run and os.path.exists(path):
+        folder = args.datasets[benchmark]["folder"]
+        path = os.path.join(args.data_root, folder)
+        if args.debug and os.path.exists(path):
             shutil.rmtree(path)
-
         if not os.path.exists(path) or not os.listdir(path):
             ungenerated.append(benchmark)
-
-    if ungenerated:
-        not_generated = []
-        for benchmark in ungenerated:
-            print("Generating data for", benchmark, "...")
-            if not generator.generate(datasets[benchmark]):
-                not_generated.append(benchmark)
-
-        if not_generated:
-            raise RuntimeError(
-                "These datasets cannot be generated: {}.".format(
-                    " ".join(not_generated)
-                )
-            )
+    data_generator = DataGenerator(args.data_root)
+    data_generator.generate(*ungenerated)
 
 
-def check_benchmarks(args) -> None:
+def check_benchmarks(args: argparse.Namespace) -> None:
     with open(absolutize("./data_react/dataconfig.json")) as f:
         datacfg = json.load(f)
-    datasets = datacfg["datasets"]
-    tag2data = datacfg["tag2data"]
+    for attr in ["datasets", "tag2data"]:
+        setattr(args, attr, datacfg.get(attr))
 
-    args.benchmarks = parse_benchmarks(args, datasets, tag2data)
+    parse_benchmarks(args)
 
     external = []
     synthetic = []
     for benchmark in args.benchmarks:
-        if "gen_type" in datasets[benchmark]:
+        if "gen_type" in args.datasets[benchmark]:
             synthetic.append(benchmark)
         else:
             external.append(benchmark)
 
-    load_benchmarks(external, datasets, args.data_root)
-    generate_benchmarks(synthetic, datasets, args.data_root, args.debug)
+    if external:
+        load_benchmarks(args, external)
+    if synthetic:
+        generate_benchmarks(args, synthetic)
 
 
 def check_input(args: argparse.Namespace) -> None:
@@ -199,8 +170,7 @@ if __name__ == "__main__":
         "--model", type=str, nargs="+", help="Model(s) to train", required=True
     )
     parser.add_argument("--benchmarks", nargs="+", type=str, required=True)
-    parser.add_argument("--data_root", type=str,
-                        help="Path to folder with dataset.")
+    parser.add_argument("--data_root", type=str, help="Path to folder with dataset.")
     parser.add_argument(
         "--baseline",
         help="Whether to train baseline model",
@@ -233,11 +203,18 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ignore_warnings",
         type=distutils.util.strtobool,
-        help="Whether to supress warning or not",
+        help="Whether to supress warnings or not",
     )
-
-    parser.add_argument("--debug", type=distutils.util.strtobool,
-                        help="Whether to run the debug version of the program")
+    parser.add_argument(
+        "--debug",
+        type=distutils.util.strtobool,
+        help="Whether to destroys generated fata",
+    )
+    parser.add_argument(
+        "--progress_bar",
+        type=distutils.util.strtobool,
+        help="Whether to demonstrate progress bar",
+    )
 
     parser.set_defaults(
         n_states=10,
@@ -249,7 +226,8 @@ if __name__ == "__main__":
         config_path=DEFAULT_CONFIG_PATH,
         results_root=DEFAULT_RESULTS_ROOT,
         ignore_warnings="True",
-        debug="True"
+        debug="True",
+        progress_bar="False",
     )
 
     args = parser.parse_args()
@@ -265,6 +243,7 @@ if __name__ == "__main__":
             args.verbose,
             args.log,
             args.log_root,
+            args.progress_bar,
         )
         runner.run(args.benchmarks)
 
