@@ -1,10 +1,7 @@
-def _generate_sign(args):
-    # TODO
-    x = [[1], [2]]
-    y = [1]
-    return x, y, True
+def _generate_gaussian(args):
+    pass
 
 
-def generate_anticausal(type, args):
+def generate_anticausal(type, params):
     func = globals()[f"_generate_{type}"]
     return func(args)

@@ -134,13 +134,5 @@ def _read_synthetic_data(root: str):
     return x, y
 
 
-def read_causal_gaussian_1(root: str):
-    return _read_synthetic_data(root)
-
-
-def read_causal_gaussian_2(root: str):
-    return _read_synthetic_data(root)
-
-
 def read_anticausal_gaussian_1(root: str):
     return _read_synthetic_data(root)

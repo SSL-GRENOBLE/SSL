@@ -25,7 +25,7 @@ class DataGenerator(object):
         gen_type = benchmark["gen_type"]
         params = benchmark["params"]
         func = globals()[f"generate_{gen_type}"]
-        x, y, success = func(params["type"], params["values"])
+        x, y, success = func(params["type"], params["args"])
         if success:
             self.__write_file(x, y, benchmark)
         return success
