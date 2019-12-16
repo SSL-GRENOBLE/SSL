@@ -1,19 +1,22 @@
-# from lightgbm import LGBMClassifier
 from sklearn.ensemble import RandomForestClassifier
 
 from .ssclustering import SSClustering
 
 
-class SSLGBMClassifier(object):
+class SSClusteringClassifier(object):
     def __init__(
-        self, eps: float, min_points: int, random_state: int, **kwargs
+        self,
+        eps: float,
+        min_points: int,
+        random_state: int = 42,
+        use_border_points: bool = False,
+        **kwargs
     ) -> None:
-        self.clustering = SSClustering(eps, min_points)
-        # self.model = LGBMClassifier(random_state=random_state, **kwargs)
+        self.clustering = SSClustering(eps, min_points, use_border_points)
         self.model = RandomForestClassifier(random_state=random_state, **kwargs)
 
     def fit(self, ldata, labels, udata) -> None:
-        X_train, y_train = self.clustering.fit(ldata, labels, udata)
+        X_train, y_train = self.clustering.transform(ldata, labels, udata)
         self.model.fit(X_train, y_train)
         return self
 
