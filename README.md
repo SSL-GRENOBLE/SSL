@@ -48,7 +48,7 @@ if __name__ == "__main__":
         ],
         "verbose": "True",
         "lsizes": [
-            10
+            0.1
         ],
         "n_states": 1,
         "log": "True"

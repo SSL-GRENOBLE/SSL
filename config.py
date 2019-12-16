@@ -18,7 +18,7 @@ from sslearn.models.rf import (
     SemiSupervisedRandomForest,
     RandomForest,
 )  # noqa
-from sslearn.models.clustering._customs import SSLGBMClassifier  # noqa
+from sslearn.models.clustering._customs import SSClusteringClassifier  # noqa
 
 
 configs = {
@@ -31,7 +31,7 @@ configs = {
             "margin_mode": "soft",
             "max_iter": 150,
         },
-        "baseline_inits": {"n_estimators": 100},
+        "baseline_inits": {"n_estimators": 100,},
     },
     "lda": {
         "model_cls": SemiSupervisedLinearDiscriminantAnalysis,
@@ -40,8 +40,18 @@ configs = {
     "lgc": {"model_cls": LGC},
     "rf": {"model_cls": SemiSupervisedRandomForest, "baseline_cls": RandomForest},
     "clustering": {
-        "model_cls": SSLGBMClassifier,
+        "model_cls": SSClusteringClassifier,
         "baseline_cls": RandomForestClassifier,
-        "model_inits": {"eps": 30, "min_points": 10, "random_state": 42},
+        "model_inits": {
+            "eps": 30,
+            "min_points": 10,
+            "random_state": 42,
+            "use_border_points": True,
+            "n_estimators": 100,
+        },
+        "baseline_inits": {
+            "random_state": 42,
+            "n_estimators": 100,
+        },
     },
 }
