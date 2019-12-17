@@ -113,6 +113,54 @@
                 "eps": 0,
                 "n_samples": 2000
             }
+        },
+        "moons": {
+            "folder": "synthetic/clustering/moons",
+            "n_classes": 2,
+            "gen_type": "clustering",
+            "gen_func": "moons",
+            "params": {
+                "n_samples": 2000,
+                "noise": 0.15
+            }
+        },
+        "circles": {
+            "folder": "synthetic/clustering/circles",
+            "n_classes": 2,
+            "gen_type": "clustering",
+            "gen_func": "circles",
+            "params": {
+                "n_samples": 2000,
+                "noise": 0.05
+            }
+        },
+        "quadratic": {
+            "folder": "synthetic/clustering/quadratic",
+            "n_classes": 2,
+            "gen_type": "clustering",
+            "gen_func": "quadratic",
+            "params": {
+                "n_samples": 2000,
+                "cluster_std": 0.4,
+                "centers": [
+                    [
+                        1,
+                        1
+                    ],
+                    [
+                        -1,
+                        -1
+                    ],
+                    [
+                        1,
+                        -1
+                    ],
+                    [
+                        -1,
+                        1
+                    ]
+                ]
+            }
         }
     },
     "tag2data": {
@@ -136,7 +184,11 @@
             "csnl_sparsed"
         ],
         "lowdense": [],
-        "clustering": [],
+        "clustering": [
+            "moons",
+            "circles",
+            "quadratic"
+        ],
         "manifold": []
     }
 }

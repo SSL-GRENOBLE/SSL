@@ -154,3 +154,15 @@ def read_csnl_dense(root: str):
 
 def read_csnl_sparsed(root: str):
     return _read_synthetic_data(root)
+
+
+def read_moons(root: str):
+    return _read_synthetic_data(root)
+
+
+def read_circles(root: str):
+    return _read_synthetic_data(root)
+
+
+def read_quadratic(root: str):
+    return _read_synthetic_data(root)
