@@ -49,9 +49,6 @@ configs = {
             "use_border_points": True,
             "n_estimators": 100,
         },
-        "baseline_inits": {
-            "random_state": 42,
-            "n_estimators": 100,
-        },
+        "baseline_inits": {"random_state": 42, "n_estimators": 100,},
     },
 }

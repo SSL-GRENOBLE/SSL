@@ -15,7 +15,7 @@ DEFAULT_RESULTS_ROOT = os.path.normpath(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("ResultMerger")
-    parser.add_argument("--results_root", type=str, help="Folder with produced results")
+    parser.add_argument("--results-root", type=str, help="Folder with produced results")
     parser.add_argument("--benchmarks", type=str, nargs="+", help="Benchmarks to merge")
     parser.add_argument("--models", type=str, nargs="+", help="Models to merge")
 

@@ -68,18 +68,16 @@ def check_model(args: argparse.Namespace) -> None:
 
     for model, params in args.configs.items():
         if "model_cls" not in params and "baseline_cls" not in params:
-            raise ConfigError(
-                f"No testing classes are given for model: {model}.")
+            raise ConfigError(f"No testing classes are given for model: {model}.")
 
 
 def parse_benchmarks(args: argparse.Namespace) -> None:
     if args.benchmarks[0] == "all":
-        args.benchmarks = list(args.benchmarks)
+        args.benchmarks = list(args.datasets)
     else:
         for benchmark in args.benchmarks:
             if benchmark not in args.benchmarks and benchmark not in args.tag2data:
-                raise ValueError(
-                    f"Dataset or tag is not supported: {benchmark}.")
+                raise ValueError(f"Dataset or tag is not supported: {benchmark}.")
 
         benchmarks = set()
         for benchmark in args.benchmarks:
@@ -167,13 +165,14 @@ def check_input(args: argparse.Namespace) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        "RunParser", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument(
         "--model", type=str, nargs="+", help="Model(s) to train", required=True
     )
     parser.add_argument("--benchmarks", nargs="+", type=str, required=True)
-    parser.add_argument("--data_root", type=str,
-                        help="Path to folder with dataset.")
+    parser.add_argument("--data-root", type=str, help="Path to folder with dataset.")
     parser.add_argument(
         "--baseline",
         help="Whether to train baseline model",
@@ -186,10 +185,10 @@ if __name__ == "__main__":
         "--verbose", help="Whether to print results", type=distutils.util.strtobool,
     )
     parser.add_argument(
-        "--config_path", type=str, help="Path to py-file with models' configurations"
+        "--config-path", type=str, help="Path to py-file with models' configurations"
     )
     parser.add_argument(
-        "--n_states", type=int, help="Number of random states to average"
+        "--n-states", type=int, help="Number of random states to average"
     )
     parser.add_argument(
         "--lsizes",
@@ -198,13 +197,13 @@ if __name__ == "__main__":
         help="Labelled sizes (int) or ratio (float) to test",
     )
     parser.add_argument(
-        "--log_root", type=str, help="Folder to store logs, if logging is on"
+        "--log-root", type=str, help="Folder to store logs, if logging is on"
     )
     parser.add_argument(
-        "--results_root", type=str, help="Folder to store testing result."
+        "--results-root", type=str, help="Folder to store testing result."
     )
     parser.add_argument(
-        "--ignore_warnings",
+        "--ignore-warnings",
         type=distutils.util.strtobool,
         help="Whether to supress warnings or not",
     )
@@ -214,12 +213,17 @@ if __name__ == "__main__":
         help="Whether to destroys generated fata",
     )
     parser.add_argument(
-        "--progress_bar",
+        "--progress-bar",
         type=distutils.util.strtobool,
         help="Whether to demonstrate progress bar",
     )
     parser.add_argument(
-        "--merge_results",
+        "--store-results",
+        type=distutils.util.strtobool,
+        help="Whether to store results during run",
+    )
+    parser.add_argument(
+        "--merge-results",
         type=distutils.util.strtobool,
         help="Whether to merge results after each run",
     )
@@ -234,15 +238,16 @@ if __name__ == "__main__":
         config_path=DEFAULT_CONFIG_PATH,
         results_root=DEFAULT_RESULTS_ROOT,
         ignore_warnings="True",
-        debug="True",
+        debug="False",
         progress_bar="False",
-        merge_results="False",
+        merge_results="True",
+        store_results="True",
     )
 
     args = parser.parse_args()
     check_input(args)
 
-    if args.merge_results:
+    if args.store_results and args.merge_results:
         merged_results = []
 
     for model in args.model:
@@ -257,24 +262,27 @@ if __name__ == "__main__":
             args.log_root,
             args.progress_bar,
         )
-        runner.run(args.benchmarks)
 
         for benchmark in args.benchmarks:
-            benchmark_root = os.path.join(args.results_root, benchmark)
-            model_root = os.path.join(benchmark_root, model)
-            try:
-                os.makedirs(model_root)
-            except FileExistsError:
-                pass
-            filename = datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")
-            path = os.path.join(model_root, filename)
-            df = pd.DataFrame(runner.stats_[benchmark])
-            df["model"] = model
-            df.to_csv(f"{path}.csv", sep=" ", index=False)
-            if args.merge_results:
-                merged_results.append(df)
+            runner.run(benchmark)
 
-    if args.merge_results:
+            if args.store_results:
+                df = pd.DataFrame.from_records(runner.stats_[benchmark])
+                df["model"] = model
+                benchmark_root = os.path.join(args.results_root, benchmark)
+                model_root = os.path.join(benchmark_root, model)
+                try:
+                    os.makedirs(model_root)
+                except FileExistsError:
+                    pass
+                filename = datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")
+                path = os.path.join(model_root, f"{filename}.csv")
+                df.to_csv(path, sep=" ", index=False)
+
+                if args.merge_results:
+                    merged_results.append(df)
+
+    if args.store_results and args.merge_results:
         merged_root = os.path.join(args.results_root, "merged")
         try:
             os.makedirs(merged_root)
