@@ -43,7 +43,7 @@ configs = {
         "model_cls": SSClusteringClassifier,
         "baseline_cls": RandomForestClassifier,
         "model_inits": {
-            "eps": 30,
+            "eps": 0.1,
             "min_points": 10,
             "random_state": 42,
             "use_border_points": True,
