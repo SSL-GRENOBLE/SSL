@@ -121,7 +121,7 @@
             "gen_func": "moons",
             "params": {
                 "n_samples": 2000,
-                "noise": 0.15
+                "noise": 0.05
             }
         },
         "circles": {
@@ -131,7 +131,7 @@
             "gen_func": "circles",
             "params": {
                 "n_samples": 2000,
-                "noise": 0.05
+                "noise": 0.01
             }
         },
         "quadratic": {
