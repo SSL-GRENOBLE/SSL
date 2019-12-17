@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def _generate_function(func, **kwargs):
+def _generate_with_function(func, **kwargs):
     params = dict(kwargs.items())
     n_samples = params["n_samples"]
     max_value = params["range"]
@@ -17,8 +17,8 @@ def _generate_function(func, **kwargs):
 
 
 def generate_sign_nonlinear(**kwargs):
-    return _generate_function(np.sin, **kwargs)
+    return _generate_with_function(np.sin, **kwargs)
 
 
 def generate_sign_linear(**kwargs):
-    return _generate_function(lambda x: x, **kwargs)
+    return _generate_with_function(lambda x: x, **kwargs)
