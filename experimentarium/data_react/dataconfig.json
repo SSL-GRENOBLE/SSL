@@ -99,6 +99,7 @@
             "gen_func": "sign_nonlinear",
             "params": {
                 "range": 10,
+                "eps": 0,
                 "n_samples": 2000
             }
         },
@@ -109,6 +110,7 @@
             "gen_func": "sign_nonlinear",
             "params": {
                 "range": 100000,
+                "eps": 0,
                 "n_samples": 2000
             }
         }
