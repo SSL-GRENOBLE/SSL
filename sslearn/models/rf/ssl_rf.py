@@ -15,7 +15,7 @@ class SemiSupervisedRandomForest(RandomForest):
             max_iter - number of iterations
     """
 
-    def __init__(self, random_state, T0=0.005, alpha=0.1, c0=1.1, max_iter=1):
+    def __init__(self, random_state, T0=0.005, alpha=0.1, c0=1.1, max_iter=20):
         super().__init__(random_state)
         self.T0 = T0
         self.c0 = c0
@@ -36,7 +36,8 @@ class SemiSupervisedRandomForest(RandomForest):
         p_new = []
         for i in range(0, len(probs)):
             probs[i] = [eps if p_ <= 0 else p_ for p_ in probs[i]]
-            p_upd = [np.exp(-(self.alpha * np.log(p) * p + T) / T) for p in probs[i]]
+            p_upd = [np.exp(-(self.alpha * np.log(p) * p + T) / T)
+                     for p in probs[i]]
             Z = np.sum(p_upd)
             if np.isinf(Z) or np.any(np.isinf(p_upd)):
                 return [], True

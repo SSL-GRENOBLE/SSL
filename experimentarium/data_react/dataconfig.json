@@ -36,22 +36,82 @@
             "folder": "kr_vs_kp",
             "n_classes": 2
         },
-        "anticausal_gaussian_1": {
-            "folder": "synthetic/causality/acg1",
+        "ag_dense": {
+            "folder": "synthetic/causality/ag_dense",
             "n_classes": 2,
             "gen_type": "anticausal",
             "gen_func": "gaussian",
             "params": {
-                "args": {
-                    "means": [
-                        1,
-                        2
-                    ],
-                    "variances": [
-                        3,
-                        4
-                    ]
-                }
+                "means": [
+                    0,
+                    0.5
+                ],
+                "variances": [
+                    5,
+                    1
+                ],
+                "n_samples": 2000
+            }
+        },
+        "ag_separable": {
+            "folder": "synthetic/causality/ag_separable",
+            "n_classes": 2,
+            "gen_type": "anticausal",
+            "gen_func": "gaussian",
+            "params": {
+                "means": [
+                    0,
+                    0.1
+                ],
+                "variances": [
+                    100,
+                    10
+                ],
+                "n_samples": 2000
+            }
+        },
+        "csl_dense": {
+            "folder": "synthetic/causality/csl_dense",
+            "n_classes": 2,
+            "gen_type": "causal",
+            "gen_func": "sign_linear",
+            "params": {
+                "range": 10,
+                "eps": 0.5,
+                "n_samples": 2000
+            }
+        },
+        "csl_sparsed": {
+            "folder": "synthetic/causality/csl_sparsed",
+            "n_classes": 2,
+            "gen_type": "causal",
+            "gen_func": "sign_linear",
+            "params": {
+                "range": 100000,
+                "eps": 10,
+                "n_samples": 2000
+            }
+        },
+        "csnl_dense": {
+            "folder": "synthetic/causality/csnl_dense",
+            "n_classes": 2,
+            "gen_type": "causal",
+            "gen_func": "sign_nonlinear",
+            "params": {
+                "range": 10,
+                "eps": 0,
+                "n_samples": 2000
+            }
+        },
+        "csnl_sparsed": {
+            "folder": "synthetic/causality/csnl_sparsed",
+            "n_classes": 2,
+            "gen_type": "causal",
+            "gen_func": "sign_nonlinear",
+            "params": {
+                "range": 100000,
+                "eps": 0,
+                "n_samples": 2000
             }
         }
     },
@@ -68,7 +128,12 @@
             "vehicles",
             "balance_scale",
             "kr_vs_kp",
-            "anticausal_gaussian_1"
+            "ag_dense",
+            "ag_separable",
+            "csl_dense",
+            "csl_sparsed",
+            "csnl_dense",
+            "csnl_sparsed"
         ],
         "lowdense": [],
         "clustering": [],

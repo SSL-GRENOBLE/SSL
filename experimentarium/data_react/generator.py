@@ -37,4 +37,5 @@ class DataGenerator(object):
             os.makedirs(path)
         filename = os.path.join(path, "data.txt")
 
-        np.savetxt(filename, np.hstack((x, y[:, None])), fmt="%10.5f", delimiter=",")
+        np.savetxt(filename, np.hstack(
+            (x, y[:, None])), fmt="%10.5f", delimiter=",")
