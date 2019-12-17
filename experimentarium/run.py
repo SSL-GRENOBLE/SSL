@@ -68,7 +68,8 @@ def check_model(args: argparse.Namespace) -> None:
 
     for model, params in args.configs.items():
         if "model_cls" not in params and "baseline_cls" not in params:
-            raise ConfigError(f"No testing classes are given for model: {model}.")
+            raise ConfigError(
+                f"No testing classes are given for model: {model}.")
 
 
 def parse_benchmarks(args: argparse.Namespace) -> None:
@@ -77,7 +78,8 @@ def parse_benchmarks(args: argparse.Namespace) -> None:
     else:
         for benchmark in args.benchmarks:
             if benchmark not in args.benchmarks and benchmark not in args.tag2data:
-                raise ValueError(f"Dataset or tag is not supported: {benchmark}.")
+                raise ValueError(
+                    f"Dataset or tag is not supported: {benchmark}.")
 
         benchmarks = set()
         for benchmark in args.benchmarks:
@@ -159,7 +161,7 @@ def check_input(args: argparse.Namespace) -> None:
     check_benchmarks(args)
 
     if args.lsizes is None:
-        args.lsizes = [0.005, 0.01, 0.05, 0.1, 0.25, 0.5]
+        args.lsizes = [0.05, 0.1, 0.25]
 
     args.random_states = list(range(args.n_states))
 
@@ -170,7 +172,8 @@ if __name__ == "__main__":
         "--model", type=str, nargs="+", help="Model(s) to train", required=True
     )
     parser.add_argument("--benchmarks", nargs="+", type=str, required=True)
-    parser.add_argument("--data_root", type=str, help="Path to folder with dataset.")
+    parser.add_argument("--data_root", type=str,
+                        help="Path to folder with dataset.")
     parser.add_argument(
         "--baseline",
         help="Whether to train baseline model",

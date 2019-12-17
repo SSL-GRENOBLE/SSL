@@ -132,5 +132,25 @@ def _read_synthetic_data(root: str):
     return x, y
 
 
-def read_anticausal_gaussian_1(root: str):
+def read_ag_dense(root: str):
+    return _read_synthetic_data(root)
+
+
+def read_ag_separable(root: str):
+    return _read_synthetic_data(root)
+
+
+def read_csl_dense(root: str):
+    return _read_synthetic_data(root)
+
+
+def read_csl_sparsed(root: str):
+    return _read_synthetic_data(root)
+
+
+def read_csnl_dense(root: str):
+    return _read_synthetic_data(root)
+
+
+def read_csnl_sparsed(root: str):
     return _read_synthetic_data(root)
