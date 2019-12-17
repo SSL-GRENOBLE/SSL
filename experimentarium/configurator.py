@@ -93,10 +93,6 @@ class TestRunner(object):
         self.data_root = data_root
         self.random_states = random_states
         self.lsizes = lsizes
-        self.stats_ = defaultdict(list)
-
-        self.__stats = {}
-        self.__reader = DataReader(data_root)
 
         self.verbose = verbose
         self.progress_bar = progress_bar
@@ -108,11 +104,18 @@ class TestRunner(object):
         ) as f:
             self.datacfg = json.load(f)
 
+        self.__reader = DataReader(data_root)
+        self.__clear_stats()
+
         self.logger.info("-" * 5 + " Configuration info " + "-" * 5)
         self.logger.info(f"Model: {self.configuration.model_cls}.")
         self.logger.info(f"Baseline: {self.configuration.baseline_cls}.")
         self.logger.info(f"Model params: {self.configuration.model_inits}.")
         self.logger.info(f"Baseline params: {self.configuration.baseline_inits}.")
+
+    def __clear_stats(self):
+        self.stats_ = defaultdict(list)
+        self.__stats = dict()
 
     def run(self, benchmarks: Union[str, List[str]]) -> None:
         """
@@ -120,6 +123,7 @@ class TestRunner(object):
             root: Path to folder with datasets.
             benchmarks: Names of datasets to test.
         """
+        self.__clear_stats()
         if isinstance(benchmarks, str):
             benchmarks = [benchmarks]
         self.logger.info("\n" + "-" * 5 + " Testing " + "-" * 5)

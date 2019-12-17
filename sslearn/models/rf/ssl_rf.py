@@ -36,8 +36,7 @@ class SemiSupervisedRandomForest(RandomForest):
         p_new = []
         for i in range(0, len(probs)):
             probs[i] = [eps if p_ <= 0 else p_ for p_ in probs[i]]
-            p_upd = [np.exp(-(self.alpha * np.log(p) * p + T) / T)
-                     for p in probs[i]]
+            p_upd = [np.exp(-(self.alpha * np.log(p) * p + T) / T) for p in probs[i]]
             Z = np.sum(p_upd)
             if np.isinf(Z) or np.any(np.isinf(p_upd)):
                 return [], True

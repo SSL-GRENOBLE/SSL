@@ -4,7 +4,9 @@ from scipy.spatial.distance import pdist, squareform
 
 
 class SSClustering(object):
-    def __init__(self, eps: float, min_points: int, use_border_points: bool = False) -> None:
+    def __init__(
+        self, eps: float, min_points: int, use_border_points: bool = False
+    ) -> None:
         """
         Arguments:
             eps: Radius of the L2-ball in which we look for neighbours of the point.
@@ -80,8 +82,11 @@ class SSClustering(object):
             cluster_labels = labels[cluster_labeled_indices]
             labels_counter = Counter(cluster_labels).most_common()
 
-            if len(labels_counter) == 0 or \
-                    len(labels_counter) > 1 and labels_counter[0][1] == labels_counter[1][1]:
+            if (
+                len(labels_counter) == 0
+                or len(labels_counter) > 1
+                and labels_counter[0][1] == labels_counter[1][1]
+            ):
                 continue
 
             main_label = labels_counter[0][0]

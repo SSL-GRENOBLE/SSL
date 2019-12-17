@@ -8,7 +8,7 @@ def _generate_with_function(func, **kwargs):
     eps = params["eps"]
 
     x = np.empty((n_samples, 1))
-    y = np.empty((n_samples, ))
+    y = np.empty((n_samples,))
 
     for i in range(0, n_samples):
         x[i] = np.random.uniform(-max_value, max_value)
