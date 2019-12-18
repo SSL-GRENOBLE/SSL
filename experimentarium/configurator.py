@@ -86,7 +86,7 @@ class TestRunner(object):
             log: Whether to log results.
                 If True, stores to log_root.
             log_root: Folder to store logs.
-                Stores log in `.ssl_test_logs` in `log_root`.
+                Stores log in `ssl_logs` in `log_root`.
             progress_bar: Whether to show progress bar while execution.
         """
         self.configuration = configuration
@@ -196,8 +196,9 @@ class TestRunner(object):
 
         for lsize in make_iter(lsizes, self.progress_bar, desc="Sizes"):
             scores = defaultdict(list)
-            ratio_ = round(lsize / len(y), 5)
+            ratio = round(lsize / len(y), 3)
 
+            self.__stats["ratio"] = ratio
             self.__stats["lsize"] = lsize
             for random_state in make_iter(
                 random_states, self.progress_bar, desc="\tRandom states"
@@ -220,14 +221,14 @@ class TestRunner(object):
                 scores["f1"].append(f1_score(preds, y_test))
 
             self.__stats["usize"] = len(x_test)
-            self.__stats["accuracy"] = np.mean(scores["accuracy"]).round(5)
+            self.__stats["accuracy"] = np.mean(scores["accuracy"]).round(3)
             self.__stats["f1"] = np.mean(scores["f1"]).round(5)
             self.__stats["is_ssl"] = is_ssl
 
             self.stats_[self.__stats["benchmark"]].append(self.__stats.copy())
 
             logger.info(
-                f"Labeled size = {lsize} (ratio {ratio_}). Metrics: "
+                f"Labeled size = {lsize} (ratio {ratio}). Metrics: "
                 "accuracy = {:.5f}., f1 = {:.5f}.".format(
                     self.__stats["accuracy"], self.__stats["f1"]
                 )

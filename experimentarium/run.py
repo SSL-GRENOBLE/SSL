@@ -15,8 +15,9 @@ from data_react import DataGenerator, WebDataDownloader
 
 
 DEFAULT_DATA_ROOT = "../../data/"
-DEFAULT_LOG_ROOT = "../../"
+DEFAULT_LOG_ROOT = "../../logs"
 DEFAULT_RESULTS_ROOT = "../../results"
+DEFAULT_MERGE_ROOT = "../../merged_results"
 DEFAULT_CONFIG_PATH = "../config.py"
 
 
@@ -145,7 +146,13 @@ def check_input(args: argparse.Namespace) -> None:
     Arguments:
         args: Parsed command line arguments.
     """
-    for attr in ["data_root", "log_root", "config_path", "results_root"]:
+    for attr in [
+        "data_root",
+        "log_root",
+        "config_path",
+        "results_root",
+        "merge_root",
+    ]:
         setattr(args, attr, absolutize(getattr(args, attr)))
 
     if not os.path.exists(args.results_root):
@@ -159,7 +166,7 @@ def check_input(args: argparse.Namespace) -> None:
     check_benchmarks(args)
 
     if args.lsizes is None:
-        args.lsizes = [0.05, 0.1, 0.25]
+        args.lsizes = [0.005, 0.01, 0.05, 0.1, 0.25, 0.5]
 
     args.random_states = list(range(args.n_states))
 
@@ -227,6 +234,7 @@ if __name__ == "__main__":
         type=distutils.util.strtobool,
         help="Whether to merge results after each run",
     )
+    parser.add_argument("--merge-root", type=str, help="Root to save merged results")
 
     parser.set_defaults(
         n_states=10,
@@ -242,6 +250,7 @@ if __name__ == "__main__":
         progress_bar="False",
         merge_results="True",
         store_results="True",
+        merge_root=DEFAULT_MERGE_ROOT,
     )
 
     args = parser.parse_args()
@@ -283,11 +292,10 @@ if __name__ == "__main__":
                     merged_results.append(df)
 
     if args.store_results and args.merge_results:
-        merged_root = os.path.join(args.results_root, "merged")
         try:
-            os.makedirs(merged_root)
+            os.makedirs(args.merge_root)
         except FileExistsError:
             pass
         filename = datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")
-        path = os.path.join(merged_root, f"{filename}.csv")
+        path = os.path.join(args.merge_root, f"{filename}.csv")
         pd.concat(merged_results).to_csv(path, sep=" ", index=False)
