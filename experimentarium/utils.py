@@ -44,7 +44,6 @@ def setup_logger(
     if verbose:
         logger.addHandler(logging.StreamHandler(sys.stdout))
     if log:
-        log_root = os.path.join(log_root, "ssl_logs")
         if not os.path.exists(log_root):
             os.mkdir(log_root)
         log_path = os.path.join(
