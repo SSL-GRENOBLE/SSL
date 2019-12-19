@@ -14,6 +14,11 @@ import seaborn as sns
 
 sns.set()
 
+
+DEFAULT_RESULTS_ROOT = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), "../../../merged_results")
+)
+
 DEFAULT_PLOTS_ROOT = os.path.normpath(
     os.path.join(os.path.dirname(__file__), "../../../plots")
 )
@@ -43,7 +48,6 @@ if __name__ == "__main__":
         "--results-root",
         type=str,
         help="Path to merged results or directory with files to merge",
-        required=True,
     )
     parser.add_argument("--plots-root", type=str, help="Directory to save plots")
     parser.add_argument(
@@ -52,7 +56,12 @@ if __name__ == "__main__":
         help="Whether to take the last created file if --results-root is directory",
     )
     parser.add_argument("--extention", type=str, help="Extention of saved plots")
-    parser.set_defaults(plots_root=DEFAULT_PLOTS_ROOT, last="False", extention="eps")
+    parser.set_defaults(
+        results_root=DEFAULT_RESULTS_ROOT,
+        plots_root=DEFAULT_PLOTS_ROOT,
+        last="True",
+        extention="png",
+    )
     args = parser.parse_args()
 
     dframes = list()

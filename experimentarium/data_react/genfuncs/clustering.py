@@ -30,5 +30,5 @@ def generate_quadratic(**kwargs):
     )
 
     y[: n_samples // 2] = 0
-    y[n_samples // 2:] = 1
+    y[n_samples // 2 :] = 1
     return x, y
