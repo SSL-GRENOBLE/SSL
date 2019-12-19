@@ -212,13 +212,18 @@ class TestRunner(object):
                     x, y, train_size=lsize, stratify=y, random_state=random_state
                 )
 
-                if is_ssl:
-                    model.fit(x_train, y_train, x_test)
+                try:
+                    if is_ssl:
+                        model.fit(x_train, y_train, x_test)
+                    else:
+                        model.fit(x_train, y_train)
+                    preds = model.predict(x_test)
+                except np.linalg.LinAlgError:
+                    scores["accuracy"].append(0)
+                    scores["f1"].append(0)
                 else:
-                    model.fit(x_train, y_train)
-                preds = model.predict(x_test)
-                scores["accuracy"].append(accuracy_score(preds, y_test))
-                scores["f1"].append(f1_score(preds, y_test))
+                    scores["accuracy"].append(accuracy_score(preds, y_test))
+                    scores["f1"].append(f1_score(preds, y_test))
 
             self.__stats["usize"] = len(x_test)
             self.__stats["accuracy"] = np.mean(scores["accuracy"]).round(3)

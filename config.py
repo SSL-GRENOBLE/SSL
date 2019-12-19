@@ -2,6 +2,7 @@ import os
 import sys
 
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 # Path to directory with sslearn folder if not in the PATH already.
 sslearn_root = os.path.dirname(__file__)
@@ -9,10 +10,7 @@ sys.path.append(sslearn_root)
 
 # Import algorithm to test.
 from sslearn.models.sla._customs import BinarySLARandomForestClassifier  # noqa
-from sslearn.models.lda import (
-    SemiSupervisedLinearDiscriminantAnalysis,
-    LinearDiscriminantAnalysis,
-)  # noqa
+from sslearn.models.lda import SemiSupervisedLinearDiscriminantAnalysis  # noqa
 from sslearn.models.lgc import LGC  # noqa
 from sslearn.models.rf import (
     SemiSupervisedRandomForest,
