@@ -166,7 +166,7 @@
     "tag2data": {
         "general": [
             "banknotes",
-            "telescope",
+            "telescope_2000",
             "mnist_4_9",
             "pendigits_4_9",
             "fashion_mnist_4_9"
