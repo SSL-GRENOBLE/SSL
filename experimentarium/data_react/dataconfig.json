@@ -4,7 +4,7 @@
             "folder": "banknotes",
             "n_classes": 2
         },
-        "telescope": {
+        "telescope_2000": {
             "folder": "telescope",
             "n_classes": 2
         },
