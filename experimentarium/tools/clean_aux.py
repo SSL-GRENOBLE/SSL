@@ -11,6 +11,7 @@ DEFAULT_MERGE_ROOT = "../../../merged_results"
 DEFAULT_PLOTS_ROOT = "../../../plots"
 DEFAULT_LOG_ROOT = "../../../logs"
 DEFAULT_SYNTHETIC_ROOT = "../../../data/synthetic"
+DEFAULT_SYNTHETIC_VISUALISATION_ROOT = "../../../synthetic_data_visualisation"
 
 
 if __name__ == "__main__":
@@ -22,7 +23,7 @@ if __name__ == "__main__":
     parser.set_defaults(data="False")
 
     args = parser.parse_args()
-    names = ["RESULTS", "MERGE", "PLOTS", "LOG"]
+    names = ["RESULTS", "MERGE", "PLOTS", "LOG", "SYNTHETIC_VISUALISATION"]
     if args.data:
         names.append("SYNTHETIC")
 
