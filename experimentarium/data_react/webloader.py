@@ -30,9 +30,9 @@ def cd(new_dir: str) -> None:
 def is_connected() -> bool:
     """Check if internet connection exists."""
     try:
-        socket.create_connection(("http://www.google.com/", 80))
+        socket.create_connection(("www.yandex.ru", 80))
         return True
-    except OSError:
+    except socket.error:
         return False
 
 
