@@ -10,7 +10,7 @@ DEFAULT_RESULTS_ROOT = "../../../results"
 DEFAULT_MERGE_ROOT = "../../../merged_results"
 DEFAULT_PLOTS_ROOT = "../../../plots"
 DEFAULT_LOG_ROOT = "../../../logs"
-DEFAULT_SYNTHETIC_ROOT = "../../data/synthetic"
+DEFAULT_SYNTHETIC_ROOT = "../../../data/synthetic"
 
 
 if __name__ == "__main__":
