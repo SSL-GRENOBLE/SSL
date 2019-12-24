@@ -9,6 +9,10 @@ def generate_gaussian(**kwargs):
     n_features = params["n_features"]
 
     x, y = make_blobs(
-        n_samples=n_samples, centers=centers, cluster_std=std, n_features=n_features, shuffle=True
+        n_samples=n_samples,
+        centers=centers,
+        cluster_std=std,
+        n_features=n_features,
+        shuffle=True,
     )
     return (x, y)
