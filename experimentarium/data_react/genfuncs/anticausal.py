@@ -1,17 +1,14 @@
-import numpy as np
+from sklearn.datasets import make_blobs
 
 
 def generate_gaussian(**kwargs):
     params = dict(kwargs.items())
-    means = params["means"]
-    variances = params["variances"]
+    centers = params["centers"]
+    std = params["std"]
     n_samples = params["n_samples"]
-    n_classes = len(means)
+    n_features = params["n_features"]
 
-    x = np.empty((n_samples, 1))
-    y = np.empty((n_samples,))
-    for i in range(0, n_samples):
-        k = np.random.randint(0, n_classes)
-        x[i] = np.random.normal(means[k], variances[k])
-        y[i] = k
+    x, y = make_blobs(
+        n_samples=n_samples, centers=centers, cluster_std=std, n_features=n_features, shuffle=True
+    )
     return (x, y)
