@@ -2,6 +2,7 @@ import json
 import os
 
 from operator import attrgetter
+from typing import Tuple
 
 import numpy as np
 
@@ -21,20 +22,22 @@ class DataGenerator(object):
 
     def generate(self, *benchmarks) -> None:
         for benchmark in benchmarks:
-            self.__generate(benchmark)
+            cfg = self.datasets[benchmark]
+            self._save(
+                *self._generate(cfg), os.path.join(self.data_root, cfg["folder"])
+            )
 
-    def __generate(self, benchmark: str) -> None:
-        cfg = self.datasets[benchmark]
-
+    @staticmethod
+    def _generate(cfg: dict) -> Tuple[np.ndarray, np.ndarray]:
         gen_type = cfg["gen_type"]
         gen_func = cfg["gen_func"]
         func = attrgetter(f"{gen_type}.generate_{gen_func}")(genfuncs)
         x, y = func(**cfg.get("params", dict()))
 
-        folder = cfg["folder"]
-        path = os.path.join(self.data_root, folder)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        filename = os.path.join(path, "data.txt")
+    @staticmethod
+    def _save(x, y, root: str) -> None:
+        if not os.path.exists(root):
+            os.makedirs(root)
+        filename = os.path.join(root, "data.txt")
 
         np.savetxt(filename, np.hstack((x, y[:, None])), fmt="%10.5f", delimiter=",")

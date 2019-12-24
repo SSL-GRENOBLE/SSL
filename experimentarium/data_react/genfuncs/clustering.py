@@ -1,5 +1,6 @@
 from sklearn import datasets
-from .variables import RANDOM_STATE
+
+from .defaults import RANDOM_STATE
 
 
 def generate_moons(**kwargs):

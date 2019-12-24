@@ -91,6 +91,7 @@
         "csl_dense": {
             "folder": "synthetic/causality/csl_dense",
             "n_classes": 2,
+            "n_features": 2,
             "gen_type": "causal",
             "gen_func": "sign_linear",
             "params": {
@@ -102,6 +103,7 @@
         "csl_sparsed": {
             "folder": "synthetic/causality/csl_sparsed",
             "n_classes": 2,
+            "n_features": 2,
             "gen_type": "causal",
             "gen_func": "sign_linear",
             "params": {
@@ -113,6 +115,7 @@
         "csnl_dense": {
             "folder": "synthetic/causality/csnl_dense",
             "n_classes": 2,
+            "n_features": 2,
             "gen_type": "causal",
             "gen_func": "sign_nonlinear",
             "params": {
@@ -124,6 +127,7 @@
         "csnl_sparsed": {
             "folder": "synthetic/causality/csnl_sparsed",
             "n_classes": 2,
+            "n_features": 2,
             "gen_type": "causal",
             "gen_func": "sign_nonlinear",
             "params": {
@@ -135,6 +139,7 @@
         "moons": {
             "folder": "synthetic/clustering/moons",
             "n_classes": 2,
+            "n_features": 2,
             "gen_type": "clustering",
             "gen_func": "moons",
             "params": {
@@ -145,6 +150,7 @@
         "circles": {
             "folder": "synthetic/clustering/circles",
             "n_classes": 2,
+            "n_features": 2,
             "gen_type": "clustering",
             "gen_func": "circles",
             "params": {
@@ -155,6 +161,7 @@
         "quadratic": {
             "folder": "synthetic/clustering/quadratic",
             "n_classes": 2,
+            "n_features": 2,
             "gen_type": "clustering",
             "gen_func": "quadratic",
             "params": {
@@ -183,6 +190,7 @@
         "spirals": {
             "folder": "synthetic/manifold/spirals",
             "n_classes": 2,
+            "n_features": 2,
             "gen_type": "manifold",
             "gen_func": "spirals",
             "params": {
