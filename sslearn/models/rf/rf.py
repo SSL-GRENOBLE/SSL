@@ -2,6 +2,7 @@ from .rf_tree import RFTree
 
 import numpy as np
 import random
+import warnings
 
 
 class RandomForest:
@@ -62,7 +63,7 @@ class RandomForest:
             X_o = X
             y_o = y
 
-        for st in range(0, 10):
+        for _ in range(0, 10):
             X_i, y_i, idx = self._prepare_train_data(X, y)
             # check that all classes are chosen for training
             if len(set(y_i)) != len(set(y)):
@@ -70,7 +71,7 @@ class RandomForest:
             X_oob, y_oob = self._prepare_oob_data(X_o, y_o, idx)
             if len(X_oob) != 0:
                 return X_i, y_i, X_oob, y_oob
-        sys.exit("WARNING: We couldn't find good data fot tree#" + str(i))
+        warnings.warn("We couldn't find good data for a tree.")
 
     """Fit random forest with initial data and train trees with different data.
 
