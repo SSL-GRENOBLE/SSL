@@ -19,7 +19,7 @@ DEFAULT_RESULTS_ROOT = os.path.normpath(
     os.path.join(os.path.dirname(__file__), "../../../merged_results")
 )
 
-DEFAULT_PLOTS_ROOT = os.path.normpath(
+DEFAULT_OUT_ROOT = os.path.normpath(
     os.path.join(os.path.dirname(__file__), "../../../plots")
 )
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         type=str,
         help="Path to merged results or directory with files to merge",
     )
-    parser.add_argument("--plots-root", type=str, help="Directory to save plots")
+    parser.add_argument("--out-root", type=str, help="Directory to save plots")
     parser.add_argument(
         "--last",
         type=distutils.util.strtobool,
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     parser.add_argument("--extention", type=str, help="Extention of saved plots")
     parser.set_defaults(
         results_root=DEFAULT_RESULTS_ROOT,
-        plots_root=DEFAULT_PLOTS_ROOT,
+        out_root=DEFAULT_OUT_ROOT,
         last="True",
         extention="png",
     )
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     df = pd.concat(dframes)
 
     out_root = os.path.join(
-        args.plots_root, datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")
+        args.out_root, datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")
     )
 
     colors = sns.color_palette("muted")
