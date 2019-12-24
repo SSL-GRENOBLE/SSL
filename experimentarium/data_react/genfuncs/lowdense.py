@@ -1,6 +1,6 @@
 import numpy as np
 
-from .variables import RANDOM_STATE
+from .defaults import RANDOM_STATE
 
 
 def _get_random_data():

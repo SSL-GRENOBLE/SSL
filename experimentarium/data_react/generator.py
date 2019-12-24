@@ -32,7 +32,7 @@ class DataGenerator(object):
         gen_type = cfg["gen_type"]
         gen_func = cfg["gen_func"]
         func = attrgetter(f"{gen_type}.generate_{gen_func}")(genfuncs)
-        x, y = func(**cfg.get("params", dict()))
+        return func(**cfg.get("params", dict()))
 
     @staticmethod
     def _save(x, y, root: str) -> None:
