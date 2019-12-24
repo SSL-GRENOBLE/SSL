@@ -1,4 +1,4 @@
-import sklearn
+from sklearn import datasets
 
 
 def generate_moons(**kwargs):
@@ -6,7 +6,7 @@ def generate_moons(**kwargs):
     n_samples = params["n_samples"]
     noise = params["noise"]
 
-    x, y = sklearn.datasets.make_moons(n_samples=n_samples, noise=noise)
+    x, y = datasets.make_moons(n_samples=n_samples, noise=noise)
     return x, y
 
 
@@ -15,7 +15,7 @@ def generate_circles(**kwargs):
     n_samples = params["n_samples"]
     noise = params["noise"]
 
-    x, y = sklearn.datasets.make_circles(n_samples=n_samples, noise=noise)
+    x, y = datasets.make_circles(n_samples=n_samples, noise=noise)
     return x, y
 
 
@@ -25,7 +25,7 @@ def generate_quadratic(**kwargs):
     cluster_std = params["cluster_std"]
     centers = params["centers"]
 
-    x, y = sklearn.datasets.make_blobs(
+    x, y = datasets.make_blobs(
         n_samples=n_samples, centers=centers, shuffle=False, cluster_std=cluster_std
     )
 
