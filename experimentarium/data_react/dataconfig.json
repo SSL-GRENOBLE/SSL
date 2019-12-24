@@ -95,6 +95,7 @@
             "gen_func": "sign_linear",
             "params": {
                 "range": 10,
+                "noise": 0.5,
                 "n_samples": 2000
             }
         },
@@ -105,6 +106,7 @@
             "gen_func": "sign_linear",
             "params": {
                 "range": 100,
+                "noise": 1,
                 "n_samples": 2000
             }
         },
@@ -114,7 +116,8 @@
             "gen_type": "causal",
             "gen_func": "sign_nonlinear",
             "params": {
-                "range": 10,
+                "range": 3,
+                "noise": 0.2,
                 "n_samples": 2000
             }
         },
@@ -124,7 +127,8 @@
             "gen_type": "causal",
             "gen_func": "sign_nonlinear",
             "params": {
-                "range": 100,
+                "range": 10,
+                "noise": 0.3,
                 "n_samples": 2000
             }
         },
