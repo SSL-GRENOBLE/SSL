@@ -29,7 +29,7 @@ class DataGenerator(object):
         gen_type = cfg["gen_type"]
         gen_func = cfg["gen_func"]
         func = attrgetter(f"{gen_type}.generate_{gen_func}")(genfuncs)
-        x, y = func(**cfg["params"])
+        x, y = func(**cfg.get("params", dict()))
 
         folder = cfg["folder"]
         path = os.path.join(self.data_root, folder)

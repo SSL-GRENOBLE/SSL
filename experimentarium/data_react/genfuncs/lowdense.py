@@ -11,25 +11,25 @@ def _get_random_data():
 
 
 def generate_vertical_no_lowdense(**kwargs):
-    X = _get_random_data()
-    X = X[np.abs(X[:, 0]) >= 0.15]
-    y = np.logical_xor(X[:, 0] > 0, X[:, 1] > 0).astype('int')
-    return X, y
+    x = _get_random_data()
+    x = x[np.abs(x[:, 0]) >= 0.15]
+    y = np.logical_xor(x[:, 0] > 0, x[:, 1] > 0).astype("int")
+    return x, y
 
 
 def generate_no_lowdense(**kwargs):
-    X = _get_random_data()
-    X = X[np.abs(X[:, 0]) >= 0.15]
-    X = X[np.abs(X[:, 1]) >= 0.15]
-    y = np.logical_xor(X[:, 0] > 0, X[:, 1] > 0).astype('int')
-    return X, y
+    x = _get_random_data()
+    x = x[np.abs(x[:, 0]) >= 0.15]
+    x = x[np.abs(x[:, 1]) >= 0.15]
+    y = np.logical_xor(x[:, 0] > 0, x[:, 1] > 0).astype("int")
+    return x, y
 
 
 def generate_lowdense(**kwargs):
-    X = _get_random_data()
-    X = X[np.abs(X[:, 0]) >= 0.1]
+    x = _get_random_data()
+    x = x[np.abs(x[:, 0]) >= 0.1]
     y = np.logical_or(
-        np.logical_and(X[:, 0] > 0, X[:, 1] > 0),
-        np.logical_and(X[:, 0] > 0, X[:, 1] < 0)
-    ).astype('int')
-    return X, y
+        np.logical_and(x[:, 0] > 0, x[:, 1] > 0),
+        np.logical_and(x[:, 0] > 0, x[:, 1] < 0),
+    ).astype("int")
+    return x, y
