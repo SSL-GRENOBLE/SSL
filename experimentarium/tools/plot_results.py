@@ -43,7 +43,9 @@ class _Canvas(object):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("Plotter")
+    parser = argparse.ArgumentParser(
+        "Plotter", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument(
         "--results-root",
         type=str,

@@ -16,7 +16,9 @@ DEFAULT_OUT_ROOT = os.path.normpath(
 )
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("ResultMerger")
+    parser = argparse.ArgumentParser(
+        "ResultMerger", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument("--results-root", type=str, help="Folder with produced results")
     parser.add_argument("--out-root", type=str, help="Root to save merged results")
     parser.add_argument("--benchmarks", type=str, nargs="+", help="Benchmarks to merge")

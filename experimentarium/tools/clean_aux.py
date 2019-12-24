@@ -15,7 +15,9 @@ DEFAULT_SYNTHETIC_VISUALISATION_ROOT = "../../../synthetic_data_visualisation"
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("CleanAux")
+    parser = argparse.ArgumentParser(
+        "CleanAux", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument(
         "--data", type=distutils.util.strtobool, help="Whether to delete synthetic data"
     )

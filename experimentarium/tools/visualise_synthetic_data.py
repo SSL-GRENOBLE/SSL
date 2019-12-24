@@ -24,7 +24,10 @@ DEFAULT_OUT_ROOT = _absolutize("../../../synthetic_data_visualisation")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("SyntheticDataVisualisator")
+    parser = argparse.ArgumentParser(
+        "SyntheticDataVisualisator",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
     parser.add_argument(
         "--out-root", type=str, help="Root to save visualised synthetic data"
     )
