@@ -197,6 +197,27 @@
                 "n_samples": 1000,
                 "noise": 0.5
             }
+        },
+        "vertical_no_lowdense": {
+            "folder": "synthetic/lowdense/vertical_no_lowdense",
+            "n_classes": 2,
+            "gen_type": "lowdense",
+            "gen_func": "vertical_no_lowdense",
+            "n_features": 2
+        },
+        "no_lowdense": {
+            "folder": "synthetic/lowdense/no_lowdense",
+            "n_classes": 2,
+            "gen_type": "lowdense",
+            "gen_func": "no_lowdense",
+            "n_features": 2
+        },
+        "lowdense": {
+            "folder": "synthetic/lowdense/lowdense",
+            "n_classes": 2,
+            "gen_type": "lowdense",
+            "gen_func": "lowdense",
+            "n_features": 2
         }
     },
     "tag2data": {
@@ -219,7 +240,11 @@
             "csnl_dense",
             "csnl_sparsed"
         ],
-        "lowdense": [],
+        "low_dense": [
+            "vertical_no_lowdense",
+            "no_lowdense",
+            "lowdense"
+        ],
         "clustering": [
             "moons",
             "circles",
