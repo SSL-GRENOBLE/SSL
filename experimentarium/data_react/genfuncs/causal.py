@@ -1,4 +1,5 @@
 import numpy as np
+from .variables import RANDOM_STATE
 
 
 def _generate_with_function(func, **kwargs):
@@ -7,13 +8,15 @@ def _generate_with_function(func, **kwargs):
     max_value = params["range"]
     noise_limit = params["noise"]
 
+    r = np.random.RandomState(RANDOM_STATE)
+
     X = np.empty((n_samples, 2))
     y = np.empty((n_samples,))
-    noise = np.random.normal(0, noise_limit, n_samples)
+    noise = r.normal(0, noise_limit, n_samples)
 
     for i in range(0, n_samples):
-        X[i][0] = np.random.uniform(-max_value, max_value)
-        X[i][1] = np.random.uniform(-max_value, max_value) 
+        X[i][0] = r.uniform(-max_value, max_value)
+        X[i][1] = r.uniform(-max_value, max_value)
         y[i] = 1 if np.sign(func(X[i][0] + X[i][1]) + noise[0]) > 0 else 0
     return (X, y)
 
