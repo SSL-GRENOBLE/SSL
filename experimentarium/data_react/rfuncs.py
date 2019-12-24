@@ -175,3 +175,7 @@ def read_circles(root: str):
 
 def read_quadratic(root: str):
     return _read_synthetic_data(root)
+
+
+def read_spirals(root: str):
+    return _read_synthetic_data(root)
