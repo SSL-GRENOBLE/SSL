@@ -1,10 +1,13 @@
+import glob
 import gzip
 import os
 
+from typing import Optional
+
 import numpy as np
 import pandas as pd
-import glob
 
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 
@@ -84,12 +87,18 @@ def read_fashion_mnist_4_9(root: str):
     return pair_binarize_multi(*_read_mnists(root), 4, 9)
 
 
-def read_telescope(root: str):
+def read_telescope(root: str, n_samples: Optional[float] = None):
     path = str(os.path.join(root, "magic04.data"))
     df = pd.read_csv(path, header=None)
     x = df.values[:, :-1].astype(float)
     y = LabelEncoder().fit_transform(df.values[:, -1])
+    if n_samples is not None:
+        x, _, y, _ = train_test_split(x, y, train_size=n_samples, stratify=y)
     return x, y
+
+
+def read_telescope_2000(root: str):
+    return read_telescope(root, 2000)
 
 
 def read_banknotes(root: str):
