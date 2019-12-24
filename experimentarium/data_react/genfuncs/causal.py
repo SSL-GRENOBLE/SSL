@@ -17,7 +17,7 @@ def _generate_with_function(func, **kwargs):
     for i in range(0, n_samples):
         X[i][0] = r.uniform(-max_value, max_value)
         X[i][1] = r.uniform(-max_value, max_value)
-        y[i] = 1 if np.sign(func(X[i][0] + X[i][1]) + noise[0]) > 0 else 0
+        y[i] = 1 if np.sign(func(X[i][0] + X[i][1]) + noise[i]) > 0 else 0
     return (X, y)
 
 
