@@ -74,7 +74,12 @@ def check_model(args: argparse.Namespace) -> None:
 
 def parse_benchmarks(args: argparse.Namespace) -> None:
     if args.benchmarks[0] == "all":
-        args.benchmarks = list(args.datasets)
+        benchmarks = list(args.datasets)
+    elif args.benchmarks[0] == "synthetic":
+        benchmarks = list()
+        for benchmark, params in args.datasets.items():
+            if "gen_type" in params:
+                benchmarks.append(benchmark)
     else:
         for benchmark in args.benchmarks:
             if benchmark not in args.benchmarks and benchmark not in args.tag2data:
@@ -86,7 +91,8 @@ def parse_benchmarks(args: argparse.Namespace) -> None:
                 benchmarks = benchmarks.union(args.tag2data[benchmark])
             else:
                 benchmarks.add(benchmark)
-        args.benchmarks = list(benchmarks)
+        benchmarks = list(benchmarks)
+    args.benchmarks = benchmarks
 
 
 def load_benchmarks(args: argparse.Namespace, benchmarks: List) -> None:
@@ -119,11 +125,6 @@ def generate_benchmarks(args: argparse.Namespace, benchmarks: List) -> None:
 
 
 def check_benchmarks(args: argparse.Namespace) -> None:
-    with open(absolutize("./data_react/dataconfig.json")) as f:
-        datacfg = json.load(f)
-    for attr in ["datasets", "tag2data"]:
-        setattr(args, attr, datacfg.get(attr))
-
     parse_benchmarks(args)
 
     external = []
@@ -172,13 +173,26 @@ def check_input(args: argparse.Namespace) -> None:
 
 
 if __name__ == "__main__":
+    with open(absolutize("./data_react/dataconfig.json")) as f:
+        datacfg = json.load(f)
+    benchmark_choices = ["all", "synthetic"]
+    for key in ["datasets", "tag2data"]:
+        benchmark_choices.extend(datacfg[key])
+
     parser = argparse.ArgumentParser(
         "RunParser", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
         "--model", type=str, nargs="+", help="Model(s) to train", required=True
     )
-    parser.add_argument("--benchmarks", nargs="+", type=str, required=True)
+    parser.add_argument(
+        "--benchmarks",
+        nargs="+",
+        type=str,
+        required=True,
+        help="Benchmarks to run. See dataconfig.json for more choice options",
+        choices=benchmark_choices,
+    )
     parser.add_argument("--data-root", type=str, help="Path to folder with dataset.")
     parser.add_argument(
         "--baseline",
@@ -254,6 +268,8 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    for attr in ["datasets", "tag2data"]:
+        setattr(args, attr, datacfg.get(attr))
     check_input(args)
 
     if args.store_results and args.merge_results:
