@@ -179,3 +179,15 @@ def read_quadratic(root: str):
 
 def read_spirals(root: str):
     return _read_synthetic_data(root)
+
+
+def read_vertical_no_lowdense(root: str):
+    return _read_synthetic_data(root)
+
+
+def read_no_lowdense(root: str):
+    return _read_synthetic_data(root)
+
+
+def read_lowdense(root: str):
+    return _read_synthetic_data(root)
