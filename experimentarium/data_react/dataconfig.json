@@ -161,6 +161,16 @@
                     ]
                 ]
             }
+        },
+        "spirals": {
+            "folder": "synthetic/manifold/spirals",
+            "n_classes": 2,
+            "gen_type": "manifold",
+            "gen_func": "spirals",
+            "params": {
+                "n_samples": 1000,
+                "noise": 0.5
+            }
         }
     },
     "tag2data": {
@@ -189,6 +199,6 @@
             "circles",
             "quadratic"
         ],
-        "manifold": []
+        "manifold": ["spirals"]
     }
 }
