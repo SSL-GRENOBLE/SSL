@@ -1,7 +1,7 @@
 import json
 import os
+import socket
 import sys
-import urllib.request
 import warnings
 
 from subprocess import call
@@ -30,9 +30,9 @@ def cd(new_dir: str) -> None:
 def is_connected() -> bool:
     """Check if internet connection exists."""
     try:
-        urllib.request.urlopen("http://www.google.com/", timeout=20)
+        socket.create_connection(("http://www.google.com/", 80))
         return True
-    except urllib.request.URLError:
+    except OSError:
         return False
 
 
