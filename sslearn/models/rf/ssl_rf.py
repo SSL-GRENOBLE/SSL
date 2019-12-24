@@ -15,7 +15,7 @@ class SemiSupervisedRandomForest(RandomForest):
             max_iter - number of iterations
     """
 
-    def __init__(self, random_state, T0=0.005, alpha=0.1, c0=1.1, max_iter=20):
+    def __init__(self, random_state, T0=0.005, alpha=0.1, c0=1.1, max_iter=6):
         super().__init__(random_state)
         self.T0 = T0
         self.c0 = c0
@@ -105,22 +105,22 @@ class SemiSupervisedRandomForest(RandomForest):
             # print("OOBE =", oobe, " on step m=", m)
 
         if oobe > self.oobe:
-            print(
-                "[D]Semi-supervised approach was discarded with oobe: "
-                + str(oobe)
-                + ", oobe for pure RF: "
-                + str(self.oobe)
-            )
+            # print(
+            #    "[D]Semi-supervised approach was discarded with oobe: "
+            #    + str(oobe)
+            #    + ", oobe for pure RF: "
+            #    + str(self.oobe)
+            # )
             random.seed(self.random_state)
             super().fit(X_l, y_l)
 
         else:
-            print(
-                "[A]Semi-supervised approach was accepted with oobe: "
-                + str(oobe)
-                + ", oobe for pure RF: "
-                + str(self.oobe)
-            )
+            # print(
+            #    "[A]Semi-supervised approach was accepted with oobe: "
+            #    + str(oobe)
+            #    + ", oobe for pure RF: "
+            #    + str(self.oobe)
+            # )
             self.oobe = oobe
 
     """Predict labels for X, returns labels y.
