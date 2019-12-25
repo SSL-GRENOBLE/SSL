@@ -89,7 +89,6 @@ if __name__ == "__main__":
     markers = list(matplotlib.markers.MarkerStyle.markers.keys())
     del markers[markers.index(",")]
 
-    do_calc = True
     for _, bench_df in df.groupby("benchmark"):
         benchmark = bench_df.iloc[0]["benchmark"]
 
@@ -103,8 +102,7 @@ if __name__ == "__main__":
             for _, ssl_df in model_df.groupby("is_ssl"):
                 is_ssl = ssl_df.iloc[0]["is_ssl"]
 
-                if do_calc:
-                    ratios = ssl_df["ratio"].tolist()
+                ratios = ssl_df["ratio"].tolist()
 
                 for canvas, metrics in zip([acc_canvas, f1_canvas], ["accuracy", "f1"]):
                     canvas.ax.plot(
@@ -116,17 +114,15 @@ if __name__ == "__main__":
                         linestyle="-" if is_ssl else "-.",
                     )
 
-                    if do_calc:
-                        scale = ssl_df.iloc[0]["lsize"] / ratios[0]
-                        xlabels = (np.array(canvas.ax.get_xticks()) * scale).astype(int)
-                        xlim = canvas.ax.get_xlim()
+                    scale = ssl_df.iloc[0]["lsize"] / ratios[0]
+                    xlabels = (np.array(canvas.ax.get_xticks()) * scale).astype(int)
+                    xlim = canvas.ax.get_xlim()
 
                     canvas.ax_scaled.set_xlim(xlim)
                     canvas.ax_scaled.set_xticklabels(xlabels)
                     canvas.ax_scaled.legend = canvas.ax.legend
                     canvas.ax.legend()
 
-        do_calc = False
         benchmark_root = os.path.join(out_root, benchmark)
         try:
             os.makedirs(benchmark_root)
@@ -136,3 +132,4 @@ if __name__ == "__main__":
             os.path.join(benchmark_root, f"accuracy.{args.extention}")
         )
         f1_canvas.fig.savefig(os.path.join(benchmark_root, f"f1.{args.extention}"))
+        plt.close("all")
