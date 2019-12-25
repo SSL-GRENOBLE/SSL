@@ -47,7 +47,7 @@ if __name__ == "__main__":
             result_path = max(Path(model_root).glob("*.csv"), key=os.path.getctime)
             merged_results.append(pd.read_csv(result_path, sep=" ", index_col=False))
 
-    if not os.path.exists(args.outы_root):
+    if not os.path.exists(args.out_root):
         os.mkdir(args.out_root)
     path = os.path.join(
         args.out_root, f'{datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")}.csv'
