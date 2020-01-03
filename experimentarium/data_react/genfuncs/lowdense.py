@@ -1,7 +1,7 @@
 import numpy as np
 
 from .defaults import RANDOM_STATE
-from matplotlib import pyplot as plt
+
 
 def _get_random_data():
     r = np.random.RandomState(RANDOM_STATE)
