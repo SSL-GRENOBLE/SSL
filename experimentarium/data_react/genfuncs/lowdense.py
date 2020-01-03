@@ -24,7 +24,7 @@ def generate_no_lowdense(**kwargs):
         np.logical_and(x[:, 0] > 0, x[:, 1] > 0),
         np.logical_and(x[:, 0] < 0, x[:, 1] > 0)
     ).astype("int")
-    plt.scatter(x[:, 0], x[:, 1], c=y)
+
     return x, y
 
 
