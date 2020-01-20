@@ -22,7 +22,7 @@ def generate_no_lowdense(**kwargs):
     x = x[np.abs(x[:, 0]) >= 0.15]
     y = np.logical_or(
         np.logical_and(x[:, 0] > 0, x[:, 1] > 0),
-        np.logical_and(x[:, 0] < 0, x[:, 1] > 0)
+        np.logical_and(x[:, 0] < 0, x[:, 1] > 0),
     ).astype("int")
 
     return x, y
