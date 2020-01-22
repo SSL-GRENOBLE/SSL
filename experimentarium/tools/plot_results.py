@@ -47,7 +47,7 @@ class ScaledCanvas(object):
 
     @classmethod
     def create(cls, benchmark: str, ylabel: str) -> "ScaledCanvas":
-        fig, ax = plt.subplots(figsize=(10, 8))
+        fig, ax = plt.subplots(figsize=(13, 10))
         ax_scaled = ax.twiny()
         ax.set_title(f"Dataset: {benchmark}")
         ax.set_ylabel(f"{ylabel}")
@@ -251,7 +251,7 @@ if __name__ == "__main__":
             pass
         for metric, mapping_ in mapping.items():
             labelled_models = set()
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(figsize=(13, 10))
             ax.tick_params(axis="x", labelrotation=45)
             ax.set_title(f"{metric} difference at ratio {lsize}")
             ax.set_ylabel(f"Difference")
