@@ -2,6 +2,7 @@ import argparse
 import datetime
 import distutils.util
 import os
+import sys
 
 from collections import defaultdict
 from functools import partial
@@ -13,6 +14,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
+sys.path.append(os.path.normpath(os.path.join(__file__, "../../../")))  # noqa
+from experimentarium.utils import make_iter
 
 sns.set()
 
@@ -93,6 +97,11 @@ if __name__ == "__main__":
         type=float,
         help="Threshold to set for soft and hard thresholding",
     )
+    parser.add_argument(
+        "--progress-bar",
+        type=distutils.util.strtobool,
+        help="Whether to show progress bar over processed benchmarks",
+    )
 
     parser.set_defaults(
         results_root=DEFAULT_RESULTS_ROOT,
@@ -102,6 +111,7 @@ if __name__ == "__main__":
         metrics=["accuracy", "f1"],
         hard_thresholding="True",
         threshold=0.5,
+        progress_bar="True",
     )
     args = parser.parse_args()
 
@@ -134,10 +144,6 @@ if __name__ == "__main__":
     if not metrics:
         raise ValueError("No given metric found in merged dataframe.")
 
-    ratios = pd.unique(df["ratio"])
-    lsizes = pd.unique(df["lsize"])
-    scale = lsizes[0] / ratios[0]
-
     models = tuple(pd.unique(df["model"]))
     markers = tuple(
         marker
@@ -159,8 +165,14 @@ if __name__ == "__main__":
     # Plotting joint results.
     # ======================================================================
 
-    for benchmark, benchmark_df in df.groupby("benchmark"):
+    for benchmark, benchmark_df in make_iter(
+        df.groupby("benchmark"), args.progress_bar, desc="#Benchmarks processed"
+    ):
         canvases = create_scaled_canvases(metrics, benchmark, ["Accuracy", "F1 score"])
+
+        ratios = pd.unique(benchmark_df["ratio"])
+        lsizes = pd.unique(benchmark_df["lsize"])
+        scale = lsizes[0] / ratios[0]
 
         for model, model_df in benchmark_df.groupby("model"):
             add_to_diff = len(pd.unique(model_df["is_ssl"])) == 2

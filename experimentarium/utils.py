@@ -16,13 +16,13 @@ def make_iter(
     progress_bar: bool = True,
     desc: Optional[str] = None,
     total: Optional[int] = None,
-):
+) -> Iterable:
     """Make iterator or tqdm iterator from the given object."""
-    if isinstance(obj, Iterable):
+    if not isinstance(obj, Iterable):
+        raise TypeError(f"Given object is not iterable.")
+    elif not isinstance(obj, (Iterator, Generator)):
         obj_iter = iter(obj)
         total = total or len(obj)
-    elif not isinstance(obj, (Iterator, Generator)):
-        raise TypeError(f"Cannot make iterator from {type(obj)}.")
     if progress_bar:
         obj_iter = tqdm.tqdm(obj_iter, total=total, desc=desc)
     return obj_iter
