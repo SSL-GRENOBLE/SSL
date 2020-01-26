@@ -1,19 +1,17 @@
 import argparse
-import datetime
-import distutils.util
 import os
+import distutils.util
 import sys
 
 from collections import defaultdict
-from functools import partial
-from pathlib import Path
-from typing import Dict, Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+
+from __plot_utils import create_scaled_canvases, load_results, process_cli_args
 
 sys.path.append(os.path.normpath(os.path.join(__file__, "../../../")))  # noqa
 from experimentarium.utils import make_iter
@@ -30,47 +28,11 @@ DEFAULT_OUT_ROOT = os.path.normpath(
 )
 
 
-class ScaledCanvas(object):
-    def __init__(self, fig, ax, ax_scaled) -> None:
-        self.fig = fig
-        self.ax = ax
-        self.ax_scaled = ax_scaled
-
-    def rescale(self, scale: float) -> None:
-        xlabels = (np.array(self.ax.get_xticks()) * scale).astype(int)
-        xlim = self.ax.get_xlim()
-        self.ax_scaled.set_xlim(xlim)
-        self.ax_scaled.set_xticklabels(xlabels)
-        self.ax_scaled.legend = self.ax.legend
-        self.ax.legend()
-        self.ax.grid()
-
-    @classmethod
-    def create(cls, benchmark: str, ylabel: str) -> "ScaledCanvas":
-        fig, ax = plt.subplots(figsize=(13, 10))
-        ax_scaled = ax.twiny()
-        ax.set_title(f"Dataset: {benchmark}")
-        ax.set_ylabel(f"{ylabel}")
-        ax.set_xlabel("Ratio")
-        ax_scaled.set_xlabel("Lsize")
-        ax_scaled.zorder = -1
-        return ScaledCanvas(fig, ax, ax_scaled)
-
-
-def create_scaled_canvases(
-    metrics: Tuple, benchmark: str, ylabels: Tuple = None
-) -> Dict:
-    if ylabels is None:
-        ylabels = metrics
-    else:
-        assert len(metrics) == len(ylabels)
-    canvases = dict()
-    for metric, ylabel in zip(metrics, ylabels):
-        canvases[metric] = ScaledCanvas.create(benchmark, ylabel)
-    return canvases
-
-
 if __name__ == "__main__":
+    # ======================================================================
+    # Parser setting up.
+    # ======================================================================
+
     parser = argparse.ArgumentParser(
         "Plotter", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
@@ -102,6 +64,14 @@ if __name__ == "__main__":
         type=distutils.util.strtobool,
         help="Whether to show progress bar over processed benchmarks",
     )
+    parser.add_argument(
+        "--benchmarks", type=str, nargs="*", help="Which benchmarks to plot",
+    )
+    parser.add_argument(
+        "--joint-plots",
+        type=distutils.util.strtobool,
+        help="Whether to plot joint plots. False means plotting only sl/ssl plots",
+    )
 
     parser.set_defaults(
         results_root=DEFAULT_RESULTS_ROOT,
@@ -112,33 +82,19 @@ if __name__ == "__main__":
         hard_thresholding="True",
         threshold=0.5,
         progress_bar="True",
+        benchmarks=["all"],
+        joint_plots="True",
     )
     args = parser.parse_args()
+    process_cli_args(args)
 
     # ======================================================================
     # Plotting things.
     # ======================================================================
-
-    read_csv = partial(pd.read_csv, index_col=False, sep=" ")
-    if not os.path.exists(args.results_root):
-        raise FileExistsError(f"No such file or folder exists: {args.results_root}.")
-
-    dframes = list()
-    if os.path.isdir(args.results_root):
-        path_iter = Path(args.results_root).glob("*.csv")
-        if args.last:
-            dframes.append(read_csv(max(path_iter, key=os.path.getctime)))
-        else:
-            dframes.extend([read_csv(path) for path in path_iter])
-    elif os.path.isfile(args.results_root):
-        dframes.append(read_csv(args.results_root))
-    else:
-        raise ValueError("Given results root is not a file nor a folder.")
-    df = pd.concat(dframes)
-
-    out_root = os.path.join(
-        args.out_root, datetime.datetime.now().strftime("%H-%M-%S-%Y-%m-%d")
-    )
+    df = load_results(args)
+    args.benchmarks.intersection_update(pd.unique(df["benchmark"]))
+    if not args.benchmarks:
+        raise ValueError(f"None of provided benchmarks is found in loaded data.")
 
     metrics = list(set(df.columns).intersection(set(args.metrics)))
     if not metrics:
@@ -168,13 +124,18 @@ if __name__ == "__main__":
     for benchmark, benchmark_df in make_iter(
         df.groupby("benchmark"), args.progress_bar, desc="#Benchmarks processed"
     ):
-        canvases = create_scaled_canvases(metrics, benchmark, ["Accuracy", "F1 score"])
+        if args.joint_plots:
+            canvases = create_scaled_canvases(
+                metrics, benchmark, ["Accuracy", "F1 score"]
+            )
 
         ratios = pd.unique(benchmark_df["ratio"])
         lsizes = pd.unique(benchmark_df["lsize"])
         scale = lsizes[0] / ratios[0]
 
         for model, model_df in benchmark_df.groupby("model"):
+            # Some model may not have a baseline, but to build difference plot there are
+            # needed both.
             add_to_diff = len(pd.unique(model_df["is_ssl"])) == 2
             is_ssl_groupby = model_df.groupby("is_ssl")
             diff_scores = np.subtract(
@@ -194,37 +155,41 @@ if __name__ == "__main__":
                         masked_ratios = ratios[mask]
                         masked_scores = scores[mask]
 
-                        canvases[metric].ax.plot(
-                            masked_ratios,
-                            masked_scores,
-                            label=f"{model.upper()}, {'SSL' if is_ssl else 'Baseline'}",
-                            color=model2color[model],
-                            marker=marker2ssl[is_ssl],
-                            linestyle=linestyle2ssl[is_ssl],
-                        )
-                        canvases[metric].rescale(scale)
+                        if args.joint_plots:
+                            canvases[metric].ax.plot(
+                                masked_ratios,
+                                masked_scores,
+                                label="{}, {}".format(
+                                    model.upper(), "SSL" if is_ssl else "Baseline"
+                                ),
+                                color=model2color[model],
+                                marker=marker2ssl[is_ssl],
+                                linestyle=linestyle2ssl[is_ssl],
+                            )
+                            canvases[metric].rescale(scale)
 
                         for ratio, score, diff_score in zip(
                             masked_ratios, masked_scores, diff_scores[mask, i]
                         ):
                             diffs[ratio][metric][benchmark][model] = diff_score
 
-        benchmark_root = os.path.join(out_root, "joint_plots", benchmark)
-        try:
-            os.makedirs(benchmark_root)
-        except FileExistsError:
-            pass
+        if args.joint_plots:
+            benchmark_root = os.path.join(args.out_root, "joint_plots", benchmark)
+            try:
+                os.makedirs(benchmark_root)
+            except FileExistsError:
+                pass
 
-        for metric in metrics:
-            canvases[metric].fig.savefig(
-                os.path.join(benchmark_root, f"{metric}.{args.extention}")
-            )
-        plt.close("all")
+            for metric in metrics:
+                canvases[metric].fig.savefig(
+                    os.path.join(benchmark_root, f"{metric}.{args.extention}")
+                )
+            plt.close("all")
 
     # ======================================================================
     # Plotting score difference.
     # ======================================================================
-    diff_out_root = os.path.join(out_root, "score_difference")
+    diff_out_root = os.path.join(args.out_root, "score_difference")
 
     # Lsize/Ratio -> Metrics -> Benchmark -> Model -> Score
     def set_label(labelled_models: set, model: str) -> dict:
@@ -232,7 +197,7 @@ if __name__ == "__main__":
             return dict()
         return dict(label=model)
 
-    def score2edgecolor(score: float) -> str:
+    def sign2color(score: float) -> str:
         if score == 0:
             return "black"
         elif score > 0:
@@ -261,8 +226,8 @@ if __name__ == "__main__":
                         benchmark,
                         score,
                         marker=model2marker[model],
-                        color=model2color[model],
-                        edgecolors=score2edgecolor(score),
+                        color=sign2color(score),
+                        edgecolor="white",
                         **set_label(labelled_models, model),
                         s=200,
                     )
@@ -271,7 +236,8 @@ if __name__ == "__main__":
                             [],
                             [],
                             marker=model2marker[model],
-                            color=model2color[model],
+                            color="None",
+                            edgecolor="black",
                             label=model,
                         )
                     labelled_models.add(model)
