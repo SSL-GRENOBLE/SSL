@@ -72,8 +72,8 @@ def process_cli_args(args) -> None:
         benchmarks.update(data_config["datasets"])
     else:
         for name in args.benchmarks:
-            benchmarks.update(data_config["datasets"].get(name, set()))
             benchmarks.update({name} if name in data_config["datasets"] else set())
+            benchmarks.update(data_config["tag2data"].get(name, set()))
     args.benchmarks = benchmarks
 
 
