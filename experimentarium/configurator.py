@@ -1,5 +1,4 @@
 import json
-import logging
 import inspect
 import os
 import warnings
@@ -71,8 +70,8 @@ class TestRunner(object):
         self,
         configuration: MasterConfiguration,
         data_root: str,
-        random_states: List[int],
-        lsizes: List[int],
+        random_states: Union[Iterable[int], int],
+        lsizes: List[float],
         verbose: bool = True,
         log: bool = False,
         log_root: Optional[str] = None,
@@ -82,6 +81,8 @@ class TestRunner(object):
             configuration: Model configurations to be tested.
             random_states: Random states.
             lsizes: Labelled examples sizes.
+                If int, treated as number of labelled samples.
+                If float, treated as percentage from total samples to be labelled.
             verbose: Whether to print results.
             log: Whether to log results.
                 If True, stores to log_root.
@@ -91,7 +92,14 @@ class TestRunner(object):
         """
         self.configuration = configuration
         self.data_root = data_root
-        self.random_states = random_states
+        if isinstance(random_states, int):
+            random_states = [random_states]
+        self.random_states = list(random_states)
+
+        if any(not isinstance(lsize, float) for lsize in lsizes):
+            raise TypeError("each item should be float.")
+        if any(lsize >= 1 or lsize <= 0 for lsize in lsizes):
+            raise ValueError("each item should be more than 0 and less than 1.")
         self.lsizes = lsizes
 
         self.verbose = verbose
@@ -138,70 +146,48 @@ class TestRunner(object):
             n_classes = self.datacfg[benchmark]["n_classes"]
         except KeyError:
             n_classes = len(np.unique(y))
-        lsizes = []
+
+        self.__int_lsizes = list()
         for lsize in self.lsizes:
-            if not lsize.is_integer():
-                lsize = int(lsize * len(y))
-            else:
-                lsize = int(lsize)
+            lsize = int(lsize * len(y))
             if lsize < n_classes:
                 lsize = n_classes
                 warnings.warn(
                     "Given inappropriate number of labelled samples, "
                     f"changing it for {lsize}."
                 )
-            lsizes.append(lsize)
+            self.__int_lsizes.append(lsize)
 
         for mode in ["model", "baseline"]:
             if getattr(self.configuration, f"{mode}_cls") is not None:
                 for model_config in getattr(self.configuration, f"{mode}_configs"):
                     self._test_config(
-                        model_config,
-                        x,
-                        y,
-                        self.random_states,
-                        lsizes,
-                        self.logger,
-                        mode == "model",
+                        model_config, x, y, mode == "model",
                     )
 
     def _test_config(
-        self,
-        config: partial,
-        x: np.ndarray,
-        y: np.ndarray,
-        random_states: Union[Iterable[int], int] = 0,
-        lsizes: Optional[Any] = None,
-        logger: Optional[logging.Logger] = None,
-        is_ssl: bool = True,
+        self, config: partial, x: np.ndarray, y: np.ndarray, is_ssl: bool = True,
     ) -> None:
-        """
-        Arguments:
-            model: Model to test.
-            is_ssl: Whether model is semi-supervised.
-                Default is True.
-        """
-        logger.info(
+        self.logger.info(
             "\n"
             + f"...... Testing {'semisupervised' if is_ssl else 'supervised'} model:"
         )
-        logger.info(f"...... with configuration: {config.keywords or 'default'}.")
-
-        if isinstance(random_states, int):
-            random_states = [random_states]
+        self.logger.info(f"...... with configuration: {config.keywords or 'default'}.")
 
         is_random_state_kw = False
         if "random_state" in inspect.signature(config.func).parameters:
             is_random_state_kw = True
 
-        for lsize in make_iter(lsizes, self.progress_bar, desc="Sizes"):
+        for i, lsize in enumerate(
+            make_iter(self.__int_lsizes, self.progress_bar, desc="Sizes")
+        ):
             scores = defaultdict(list)
-            ratio = round(lsize / len(y), 3)
+            ratio = self.lsizes[i]
 
             self.__stats["ratio"] = ratio
             self.__stats["lsize"] = lsize
             for random_state in make_iter(
-                random_states, self.progress_bar, desc="\tRandom states"
+                self.random_states, self.progress_bar, desc="\tRandom states"
             ):
                 if is_random_state_kw:
                     model = config(random_state=random_state)
@@ -232,7 +218,7 @@ class TestRunner(object):
 
             self.stats_[self.__stats["benchmark"]].append(self.__stats.copy())
 
-            logger.info(
+            self.logger.info(
                 f"Labeled size = {lsize} (ratio {ratio}). Metrics: "
                 "accuracy = {:.5f}., f1 = {:.5f}.".format(
                     self.__stats["accuracy"], self.__stats["f1"]
