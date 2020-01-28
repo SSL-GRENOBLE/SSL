@@ -93,6 +93,8 @@ if __name__ == "__main__":
     # ======================================================================
     df = load_results(args)
     args.benchmarks.intersection_update(pd.unique(df["benchmark"]))
+    df = df[df["benchmark"].isin(args.benchmarks)]
+
     if not args.benchmarks:
         raise ValueError(f"None of provided benchmarks is found in loaded data.")
 
@@ -122,7 +124,9 @@ if __name__ == "__main__":
     # ======================================================================
 
     for benchmark, benchmark_df in make_iter(
-        df.groupby("benchmark"), args.progress_bar, desc="#Benchmarks processed"
+        df.groupby("benchmark"),
+        args.progress_bar,
+        desc="#Benchmarks processed/joint plots plotted",
     ):
         if args.joint_plots:
             canvases = create_scaled_canvases(
@@ -212,7 +216,9 @@ if __name__ == "__main__":
 
     handles = dict()
 
-    for lsize, mapping in diffs.items():
+    for lsize, mapping in make_iter(
+        diffs.items(), args.progress_bar, desc="#Difference plots plotted"
+    ):
         lsize_root = os.path.join(
             diff_out_root, f"lsize_{str(lsize).replace('.', '_')}"
         )
