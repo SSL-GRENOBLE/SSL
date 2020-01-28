@@ -129,18 +129,23 @@ if __name__ == "__main__":
                 metrics, benchmark, ["Accuracy", "F1 score"]
             )
 
-        ratios = pd.unique(benchmark_df["ratio"])
-        lsizes = pd.unique(benchmark_df["lsize"])
-        scale = lsizes[0] / ratios[0]
-
         for model, model_df in benchmark_df.groupby("model"):
+            ratios = pd.unique(model_df["ratio"])
+            lsizes = pd.unique(model_df["lsize"])
+            scale = lsizes[0] / ratios[0]
+
             # Some model may not have a baseline, but to build difference plot there are
             # needed both.
             add_to_diff = len(pd.unique(model_df["is_ssl"])) == 2
             is_ssl_groupby = model_df.groupby("is_ssl")
-            diff_scores = np.subtract(
-                *[np.maximum(_df[metrics].to_numpy(), 0.5) for _, _df in is_ssl_groupby]
-            )
+
+            if add_to_diff:
+                diff_scores = np.subtract(
+                    *[
+                        np.maximum(_df[metrics].to_numpy(), 0.5)
+                        for _, _df in is_ssl_groupby
+                    ]
+                )
 
             for is_ssl, is_ssl_df in is_ssl_groupby:
 
@@ -168,10 +173,11 @@ if __name__ == "__main__":
                             )
                             canvases[metric].rescale(scale)
 
-                        for ratio, score, diff_score in zip(
-                            masked_ratios, masked_scores, diff_scores[mask, i]
-                        ):
-                            diffs[ratio][metric][benchmark][model] = diff_score
+                        if add_to_diff:
+                            for ratio, score, diff_score in zip(
+                                masked_ratios, masked_scores, diff_scores[mask, i]
+                            ):
+                                diffs[ratio][metric][benchmark][model] = diff_score
 
         if args.joint_plots:
             benchmark_root = os.path.join(args.out_root, "joint_plots", benchmark)
@@ -216,7 +222,7 @@ if __name__ == "__main__":
             pass
         for metric, mapping_ in mapping.items():
             labelled_models = set()
-            fig, ax = plt.subplots(figsize=(13, 10))
+            fig, ax = plt.subplots(figsize=(15, 15))
             ax.tick_params(axis="x", labelrotation=45)
             ax.set_title(f"{metric} difference at ratio {lsize}")
             ax.set_ylabel(f"Difference")
