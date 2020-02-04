@@ -280,6 +280,11 @@ if __name__ == "__main__":
                     labelled_models.add(model)
             ax.axhline(max_diff_display, linestyle="--")
             ax.axhline(-max_diff_display, linestyle="--")
-            ax.legend(handles=list(handles.values()), numpoints=1)
+            ax.legend(
+                handles=list(handles.values()),
+                numpoints=1,
+                bbox_to_anchor=(1.1, 0.5),
+                borderaxespad=0,
+            )
             fig.savefig(os.path.join(lsize_root, f"{metric}.{args.extention}"))
             plt.close("all")
