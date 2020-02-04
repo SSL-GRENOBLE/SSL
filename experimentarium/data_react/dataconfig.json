@@ -236,16 +236,18 @@
             "fashion_mnist_4_9"
         ],
         "causal": [
-            "breast_w",
-            "vehicles",
             "balance_scale",
             "kr_vs_kp",
-            "ag_dense",
-            "ag_separable",
             "csl_dense",
             "csl_sparsed",
             "csnl_dense",
             "csnl_sparsed"
+        ],
+        "anticausal": [
+            "breast_w",
+            "vehicle",
+            "ag_dense",
+            "ag_separable"
         ],
         "low_dense": [
             "vertical_no_lowdense",
@@ -259,6 +261,7 @@
         ],
         "manifold": [
             "spirals",
+            "mnist_4_9",
             "overlapping_planes"
         ]
     }
