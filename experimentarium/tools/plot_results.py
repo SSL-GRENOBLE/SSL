@@ -91,7 +91,7 @@ if __name__ == "__main__":
         progress_bar="True",
         benchmarks=["all"],
         joint_plots="True",
-        max_diff_display=0.075,
+        max_diff_display=0.04,
     )
     args = parser.parse_args()
     process_cli_args(args)
@@ -229,8 +229,8 @@ if __name__ == "__main__":
         return transforms.ScaledTranslation(p / 72.0, 0, plt.gcf().dpi_scale_trans)
 
     handles = dict()
-    marker_size = 70
-    variance = 15
+    marker_size = 60
+    variance = 10
     figsize = (15, 15)
 
     for lsize, mapping in make_iter(
