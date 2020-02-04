@@ -254,7 +254,7 @@ if __name__ == "__main__":
                         edgecolor="white",
                         **set_label(labelled_models, model),
                         s=150,
-                        alpha=0.75
+                        alpha=0.75,
                     )
                     if not handles.get(model):
                         handles[model] = plt.scatter(

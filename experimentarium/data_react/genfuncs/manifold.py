@@ -37,11 +37,9 @@ def generate_overlapping_planes(**kwargs):
     z_1 = 12 * x_1 - 1 * y_1 + np.random.normal(1, 5, size)
     z_2 = -9 * x_2 + 14 * y_2 + np.random.normal(1, 5, size)
 
-    x = np.vstack((
-        np.hstack((x_1, x_2)),
-        np.hstack((y_1, y_2)),
-        np.hstack((z_1, z_2))
-    )).reshape(-1, 3)
+    x = np.vstack(
+        (np.hstack((x_1, x_2)), np.hstack((y_1, y_2)), np.hstack((z_1, z_2)))
+    ).reshape(-1, 3)
     y = np.array([0] * size + [1] * size)
 
     return x, y
