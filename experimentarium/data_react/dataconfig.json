@@ -198,6 +198,13 @@
                 "noise": 0.5
             }
         },
+        "overlapping_planes": {
+            "folder": "synthetic/manifold/overlapping_planes",
+            "n_classes": 2,
+            "n_features": 3,
+            "gen_type": "manifold",
+            "gen_func": "overlapping_planes"
+        },
         "vertical_no_lowdense": {
             "folder": "synthetic/lowdense/vertical_no_lowdense",
             "n_classes": 2,
@@ -251,7 +258,8 @@
             "quadratic"
         ],
         "manifold": [
-            "spirals"
+            "spirals",
+            "overlapping_planes"
         ]
     }
 }
