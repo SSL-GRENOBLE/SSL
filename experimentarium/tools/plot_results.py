@@ -11,6 +11,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+from matplotlib import transforms
+
 from __plot_utils import create_scaled_canvases, load_results, process_cli_args
 
 sys.path.append(os.path.normpath(os.path.join(__file__, "../../../")))  # noqa
@@ -222,6 +224,10 @@ if __name__ == "__main__":
             return "green"
         return "red"
 
+    # https://stackoverflow.com/a/43130355
+    def offset(p):
+        return transforms.ScaledTranslation(p / 72.0, 0, plt.gcf().dpi_scale_trans)
+
     handles = dict()
 
     for lsize, mapping in make_iter(
@@ -237,11 +243,12 @@ if __name__ == "__main__":
         for metric, mapping_ in mapping.items():
             labelled_models = set()
             fig, ax = plt.subplots(figsize=(15, 15))
+            trans = plt.gca().transData
             ax.tick_params(axis="x", labelrotation=45)
             ax.set_title(f"{metric} difference at ratio {lsize}")
             ax.set_ylabel(f"Difference")
             for benchmark, mapping__ in mapping_.items():
-                for model, score in mapping__.items():
+                for i, (model, score) in enumerate(mapping__.items()):
                     if score <= -max_diff_display:
                         score = -max_diff_display - 1e-3
                     elif score >= max_diff_display:
@@ -255,6 +262,7 @@ if __name__ == "__main__":
                         **set_label(labelled_models, model),
                         s=150,
                         alpha=0.75,
+                        transform=trans + offset(15 * ((i + 1) // 2) * (-1) ** i),
                     )
                     if not handles.get(model):
                         handles[model] = plt.scatter(
