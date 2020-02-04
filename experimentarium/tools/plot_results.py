@@ -229,6 +229,9 @@ if __name__ == "__main__":
         return transforms.ScaledTranslation(p / 72.0, 0, plt.gcf().dpi_scale_trans)
 
     handles = dict()
+    marker_size = 70
+    variance = 15
+    figsize = (15, 15)
 
     for lsize, mapping in make_iter(
         diffs.items(), args.progress_bar, desc="#Difference plots plotted"
@@ -242,13 +245,13 @@ if __name__ == "__main__":
             pass
         for metric, mapping_ in mapping.items():
             labelled_models = set()
-            fig, ax = plt.subplots(figsize=(15, 15))
-            trans = plt.gca().transData
+            fig, ax = plt.subplots(figsize=figsize)
+            trans_data = plt.gca().transData
             ax.tick_params(axis="x", labelrotation=45)
             ax.set_title(f"{metric} difference at ratio {lsize}")
             ax.set_ylabel(f"Difference")
             for benchmark, mapping__ in mapping_.items():
-                for i, (model, score) in enumerate(mapping__.items()):
+                for idx, (model, score) in enumerate(mapping__.items()):
                     if score <= -max_diff_display:
                         score = -max_diff_display - 1e-3
                     elif score >= max_diff_display:
@@ -258,11 +261,12 @@ if __name__ == "__main__":
                         score,
                         marker=model2marker[model],
                         color=sign2color(score),
-                        edgecolor="white",
+                        edgecolor="black",
                         **set_label(labelled_models, model),
-                        s=150,
+                        s=marker_size,
                         alpha=0.75,
-                        transform=trans + offset(15 * ((i + 1) // 2) * (-1) ** i),
+                        transform=trans_data
+                        + offset(variance * ((idx + 1) // 2) * (-1) ** idx),
                     )
                     if not handles.get(model):
                         handles[model] = plt.scatter(

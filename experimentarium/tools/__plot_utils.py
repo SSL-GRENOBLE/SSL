@@ -27,8 +27,8 @@ class ScaledCanvas(object):
         self.ax.grid()
 
     @classmethod
-    def create(cls, benchmark: str, ylabel: str) -> "ScaledCanvas":
-        fig, ax = plt.subplots(figsize=(13, 10))
+    def create(cls, benchmark: str, ylabel: str, **kwargs) -> "ScaledCanvas":
+        fig, ax = plt.subplots(figsize=kwargs.get("figsize", (13, 10)))
         ax_scaled = ax.twiny()
         ax.set_title(f"Dataset: {benchmark}")
         ax.set_ylabel(f"{ylabel}")
